@@ -1,0 +1,15 @@
+server:
+    port: 8080
+---
+
+spring:
+    profiles: development
+#MongoDB configs
+    data:
+        mongodb:
+                uri: mongodb://myplantdbuser:myplantpass@ds111461.mlab.com:11461/heroku_qm1q82dh
+
+---
+
+spring:
+    profiles: locale
