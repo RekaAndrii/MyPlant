@@ -1,0 +1,23 @@
+server:
+  port: 8080
+#MongoDB configs
+spring:
+  data:
+    mongodb:
+      uri: mongodb://myplantdbuser:myplantpass@ds111461.mlab.com:11461/heroku_qm1q82dh
+# THYMELEAF (ThymeleafAutoConfiguration)
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML5
+    encoding: UTF-8
+    content-type: text/html # ;charset=<encoding> is added
+    cache: true # set to false for hot refresh
+---
+
+spring:
+    profiles: development
+
+---
+spring:
+    profiles: locale

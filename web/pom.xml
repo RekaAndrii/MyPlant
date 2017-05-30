@@ -4,14 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.my.plant</groupId>
-	<artifactId>MyPlant</artifactId>
+	<artifactId>plant</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-    <modules>
-        <module>web</module>
-    </modules>
     <packaging>pom</packaging>
 
-	<name>MyPlant</name>
+	<name>plant</name>
 	<description>Demo project for Spring Boot</description>
 
 	<parent>
