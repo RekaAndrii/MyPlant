@@ -6,10 +6,7 @@
 	<groupId>com.my.plant</groupId>
 	<artifactId>MyPlant</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-    <modules>
-        <module>web</module>
-    </modules>
-    <packaging>pom</packaging>
+    <packaging>war</packaging>
 
 	<name>MyPlant</name>
 	<description>Demo project for Spring Boot</description>
