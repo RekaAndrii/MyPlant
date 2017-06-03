@@ -1,0 +1,24 @@
+.block-item {
+    margin: 2%;
+    border: 1px solid black;
+    width: 15vw;
+    height: 15vw;
+}
+
+.block-item.green{
+    background-color: #648637;
+}
+
+.block-item.yellow{
+    background-color: #a9a534;
+}
+
+.block-item.red{
+    background-color: #ab3d3d;
+}
+.block-item span{
+    display: block;
+    text-align: center;
+    margin-top: 40%;
+    font-size: 200%;
+}

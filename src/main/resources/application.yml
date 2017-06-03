@@ -12,7 +12,7 @@ spring:
     mode: HTML5
     encoding: UTF-8
     content-type: text/html # ;charset=<encoding> is added
-    cache: true # set to false for hot refresh
+    cache: false # set to false for hot refresh
 ---
 
 spring:

@@ -6,6 +6,8 @@
 
     <link rel="stylesheet" th:href="@{/style/bootstrap.css}"
           href="../../style/bootstrap.css" />
+    <link rel="stylesheet" th:href="@{/style/blocks.css}"
+          href="../../style/blocks.css" />
 </head>
 <body>
 
@@ -25,11 +27,18 @@
 
 <div class="container">
 
-    <div class="starter-template">
-        <h1>${home_message} mnmn</h1>
-        <h2>
-            <span th:text="'Message: ' + ${message}"></span>
-        </h2>
+    <!--<div class="starter-template">-->
+        <!--<h1>${home_message} mnmn</h1>-->
+        <!--<h2>-->
+            <!--<span th:text="'Message: ' + ${message}"></span>-->
+        <!--</h2>-->
+    <!--</div>-->
+    <div class="block-container col-xs-12">
+        <div class="block-row col-xs-12 row">
+            <div th:each="bl : ${blocks}"  class="col-xs-12 block-item" th:classappend="${bl.color.value}">
+                <span  th:text="${bl.name}"></span>
+            </div>
+        </div>
     </div>
 
 </div>
