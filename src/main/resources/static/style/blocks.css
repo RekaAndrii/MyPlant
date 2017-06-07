@@ -3,6 +3,7 @@
     border: 1px solid black;
     width: 15vw;
     height: 15vw;
+    overflow: auto;
 }
 
 .block-item.green{
@@ -20,7 +21,7 @@
     display: block;
     text-align: center;
     margin-top: 40%;
-    font-size: 200%;
+    font-size: x-large;
 }
 .hoverable {
   transition: box-shadow .55s;
