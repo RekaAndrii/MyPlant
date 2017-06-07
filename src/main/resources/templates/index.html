@@ -4,15 +4,12 @@
     <title>${home_message}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-    <link rel="stylesheet" th:href="@{/style/bootstrap.css}"
-          href="../../style/bootstrap.css" />
-    <link rel="stylesheet" th:href="@{/style/blocks.css}"
-          href="../../style/blocks.css" />
+    <link rel="stylesheet" th:href="@{/style/bootstrap.css}" href="../../style/bootstrap.css" />
+    <link rel="stylesheet" th:href="@{/style/blocks.css}" href="../../style/blocks.css" />
+    <!--<link rel="stylesheet" th:href="@{/style/mdb.css}" href="../../style/mdb.css" />-->
 
-    <script th:src="@{/js/jquery-3.2.1.min.js}"
-          src="../../js/jquery-3.2.1.min.js" />
-    <script th:src="@{/js/blocks.js}"
-            src="../../js/blocks.js" />
+    <script th:src="@{/js/jquery-3.2.1.min.js}" src="../../js/jquery-3.2.1.min.js" />
+    <script th:src="@{/js/blocks.js}" src="../../js/blocks.js" />
 </head>
 <body>
 
@@ -33,7 +30,7 @@
 <div class="container">
     <div class="block-container col-xs-12">
         <div class="block-row col-xs-12 row">
-            <div th:each="bl : ${blocks}"  class="col-xs-12 block-item" th:classappend="${bl.color.value}">
+            <div th:each="bl : ${blocks}"  class="col-xs-12 block-item hoverable" th:classappend="${bl.color.value}">
                 <span  th:text="${bl.name}"></span>
             </div>
         </div>

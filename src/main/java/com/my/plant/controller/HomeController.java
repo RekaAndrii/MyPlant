@@ -24,6 +24,7 @@ public class HomeController {
     public ModelAndView getHome(ModelAndView model){
         List<Block> blocks =  blockService.getAllBlocks();
         ColorUtil.setColorToList(blocks);
+
         model.addObject("blocks", blocks);
         model.setViewName("index");
         return model;

@@ -1,20 +1,31 @@
 package com.my.plant.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.my.plant.util.constant.BlockColor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
 /**
  * Created by User on 03.06.2017.
  */
+@Document(collection = "block")
 public class Block {
+
+    @Id
+    @JsonIgnore
+    private String _id;
     private String name;
     private String userName;
     @Transient
     private BlockColor color;
     private LocalDate creationDate;
     private LocalDate lastExecution;
+
+    public Block() {
+    }
 
     public Block(String name) {
         this.name = name;

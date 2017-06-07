@@ -11,4 +11,8 @@ public interface BlockService {
 
     List<Block> getAllBlocks();
 
+    Block findByName(String name);
+
+    void save(Block block);
+
 }

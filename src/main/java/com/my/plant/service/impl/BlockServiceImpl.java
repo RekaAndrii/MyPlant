@@ -2,9 +2,12 @@ package com.my.plant.service.impl;
 
 import com.my.plant.model.Block;
 import com.my.plant.service.BlockService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,14 +18,23 @@ import java.util.List;
 public class BlockServiceImpl implements BlockService{
     private List<Block> blocks = new ArrayList<>();
 
-    {
-        blocks.add(new Block("Sport", "andrii", LocalDate.now(), LocalDate.now().minusDays(2)));
-        blocks.add(new Block("Reading", "andrii", LocalDate.now(), LocalDate.now().minusDays(1)));
-        blocks.add(new Block("Cool thing", "andrii", LocalDate.now(), LocalDate.now().minusDays(5)));
-        blocks.add(new Block("Development", "andrii", LocalDate.now(), LocalDate.now()));
-    }
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     @Override
     public List<Block> getAllBlocks() {
-        return blocks;
+        return mongoTemplate.findAll(Block.class);
+    }
+
+    @Override
+    public Block findByName(String name) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("name").is(name));
+        return mongoTemplate.findOne(query, Block.class);
+    }
+
+    @Override
+    public void save(Block block) {
+        mongoTemplate.save(block);
     }
 }

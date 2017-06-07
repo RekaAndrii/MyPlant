@@ -1,10 +1,15 @@
 server:
   port: 8080
-#MongoDB configs
+#MongoDB configs uri: mongodb://myplantdbuser:myplantpass@ds111461.mlab.com:11461/heroku_qm1q82dh
 spring:
   data:
     mongodb:
-      uri: mongodb://myplantdbuser:myplantpass@ds111461.mlab.com:11461/heroku_qm1q82dh
+      host: ds111461.mlab.com
+      port: 11461
+      database: heroku_qm1q82dh
+      username: myplantdbuser
+      password: myplantpass
+
 # THYMELEAF (ThymeleafAutoConfiguration)
   thymeleaf:
     prefix: classpath:/templates/
