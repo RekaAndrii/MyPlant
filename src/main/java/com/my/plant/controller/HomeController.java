@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -28,5 +30,10 @@ public class HomeController {
         model.addObject("blocks", blocks);
         model.setViewName("index");
         return model;
+    }
+    @RequestMapping(path = "time", method = RequestMethod.GET)
+    public @ResponseBody String getTime(ModelAndView model){
+
+        return LocalDateTime.now().toString();
     }
 }
