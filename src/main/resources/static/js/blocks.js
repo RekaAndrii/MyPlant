@@ -9,13 +9,16 @@ function initBlockEvent(){
         span = $(this).find("span");
         blockName = $(span).text();
         block = $(this);
+        
+        block.removeClass("red");
+        block.removeClass("yellow");
+        block.removeClass("green");
+        
         $.ajax({
             url: "/block/execute",
             data: {"name": blockName},
             success: function(result){
                 if(result.hasError == false){
-                    block.removeClass("red");
-                    block.removeClass("yellow");
                     block.addClass("green");
                 }
             }});

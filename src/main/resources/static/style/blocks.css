@@ -4,6 +4,7 @@
     width: 15vw;
     height: 15vw;
     overflow: auto;
+    background-color: gray;
 }
 
 .block-item.green{
