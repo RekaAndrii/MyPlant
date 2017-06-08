@@ -3,6 +3,8 @@ package com.my.plant.controller;
 import com.my.plant.model.Block;
 import com.my.plant.service.BlockService;
 import com.my.plant.util.ColorUtil;
+import com.my.plant.util.comparator.BlockComparator;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,6 +22,8 @@ import java.util.List;
 @Controller
 public class HomeController {
 
+    private final BlockComparator blockComparator = new BlockComparator(); 
+
     @Autowired
     private BlockService blockService;
 
@@ -26,7 +31,8 @@ public class HomeController {
     public ModelAndView getHome(ModelAndView model){
         List<Block> blocks =  blockService.getAllBlocks();
         ColorUtil.setColorToList(blocks);
-
+        Collections.sort(blocks, blockComparator);
+        
         model.addObject("blocks", blocks);
         model.setViewName("index");
         return model;
