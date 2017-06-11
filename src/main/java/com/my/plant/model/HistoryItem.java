@@ -12,6 +12,8 @@ public class HistoryItem {
 
     private String userName;
 
+    private String blockName;
+
     private HistoryAction action;
 
     private LocalDateTime time;
@@ -19,10 +21,19 @@ public class HistoryItem {
     public HistoryItem() {
     }
 
-    public HistoryItem(String userName, HistoryAction action, LocalDateTime time) {
+    public HistoryItem(String userName, String blockName, HistoryAction action, LocalDateTime time) {
         this.userName = userName;
+        this.blockName = blockName;
         this.action = action;
         this.time = time;
+    }
+
+    public String getBlockName() {
+        return blockName;
+    }
+
+    public void setBlockName(String blockName) {
+        this.blockName = blockName;
     }
 
     public String getUserName() {

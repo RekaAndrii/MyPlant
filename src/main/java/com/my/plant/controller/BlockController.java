@@ -37,7 +37,8 @@ public class BlockController {
 
             block.setLastExecution(LocalDate.now());
             blockService.save(block);
-            historyService.save(new HistoryItem(block.getUserName(), HistoryAction.EXECUTED, LocalDateTime.now()));
+            historyService.save(new HistoryItem(block.getUserName(), block.getName(), HistoryAction.EXECUTED,
+                    LocalDateTime.now()));
         }
         return new AjaxResponse(false, "Successfully executed");
     }
