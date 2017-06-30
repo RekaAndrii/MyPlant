@@ -37,4 +37,11 @@ public class BlockServiceImpl implements BlockService{
     public void save(Block block) {
         mongoTemplate.save(block);
     }
+
+    @Override
+    public void remove(String name) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("name").is(name));
+        mongoTemplate.remove(query, Block.class);
+    }
 }

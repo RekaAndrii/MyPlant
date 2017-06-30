@@ -15,4 +15,6 @@ public interface BlockService {
 
     void save(Block block);
 
+    void remove(String name);
+
 }

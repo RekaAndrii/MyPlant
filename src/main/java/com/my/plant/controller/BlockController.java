@@ -9,13 +9,11 @@ import com.my.plant.util.dto.AjaxResponse;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Created by User on 04.06.2017.
@@ -44,5 +42,24 @@ public class BlockController {
         }
         return new AjaxResponse(false, "Successfully executed");
     }
+
+    @GetMapping("/all")
+    public @ResponseBody List<Block> getAll(){
+       return blockService.getAllBlocks();
+    }
+
+    @PostMapping(value = "/")
+    public @ResponseBody AjaxResponse create(@RequestBody  Block block){
+        block.setCreationDate(LocalDate.now());
+        blockService.save(block);
+        return new AjaxResponse(false, "Successfully executed");
+    }
+
+    @DeleteMapping(value = "/{name}")
+    public @ResponseBody AjaxResponse delete(@PathVariable(name = "name") String blockName){
+        blockService.remove(blockName);
+        return new AjaxResponse(false, "Successfully executed");
+    }
+
 
 }
