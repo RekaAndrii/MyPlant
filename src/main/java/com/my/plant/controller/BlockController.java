@@ -6,6 +6,7 @@ import com.my.plant.model.HistoryItem;
 import com.my.plant.service.BlockService;
 import com.my.plant.service.HistoryService;
 import com.my.plant.util.dto.AjaxResponse;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,7 @@ public class BlockController {
     private BlockService blockService;
 
     @RequestMapping(value = "/execute", method = RequestMethod.GET)
+    @ApiOperation(value = "executeBlock", nickname = "executeBlock")
     public @ResponseBody AjaxResponse executeBlock(@RequestParam(value = "name", required = false) String name){
         Block block = blockService.findByName(name);
         if(block != null){
