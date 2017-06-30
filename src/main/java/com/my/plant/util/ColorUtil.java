@@ -18,12 +18,16 @@ public class ColorUtil {
     public static void setColor(Block block){
         LocalDate now = LocalDate.now();
         LocalDate blockDate = block.getLastExecution();
-        long differnce = ChronoUnit.DAYS.between(blockDate, now);
-        if(differnce == green){
-            block.setColor(BlockColor.GREEN);
-        }else if(differnce > green && differnce <= yellow){
-            block.setColor(BlockColor.YELLOW);
-        }else if(differnce >= red){
+        if(blockDate != null) {
+            long differnce = ChronoUnit.DAYS.between(blockDate, now);
+            if (differnce == green) {
+                block.setColor(BlockColor.GREEN);
+            } else if (differnce > green && differnce <= yellow) {
+                block.setColor(BlockColor.YELLOW);
+            } else if (differnce >= red) {
+                block.setColor(BlockColor.RED);
+            }
+        } else{
             block.setColor(BlockColor.RED);
         }
     }
