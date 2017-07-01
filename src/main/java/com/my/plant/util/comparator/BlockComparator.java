@@ -12,9 +12,9 @@ public class BlockComparator implements Comparator<Block>{
 
 
     @Override
-    public int compare(Block o1, Block o2) {
-        LocalDate date1 = o1.getLastExecution();
-        LocalDate date2 = o2.getLastExecution();
+    public int compare(Block block1, Block block2) {
+        LocalDate date1 = block1.getLastExecution();
+        LocalDate date2 = block2.getLastExecution();
         // Older first
         if(date1 == null && date2 == null){
             return EQUAL;
@@ -26,6 +26,6 @@ public class BlockComparator implements Comparator<Block>{
                 return PLUS;
             }
         }
-        return o1.getLastExecution().compareTo(o2.getLastExecution());
+        return block1.getLastExecution().compareTo(block2.getLastExecution());
     }
 }

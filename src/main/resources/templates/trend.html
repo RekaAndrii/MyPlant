@@ -6,10 +6,18 @@
 
     <link rel="stylesheet" th:href="@{/style/bootstrap.css}" href="../../style/bootstrap.css" />
     <link rel="stylesheet" th:href="@{/style/blocks.css}" href="../../style/blocks.css" />
-    <!--<link rel="stylesheet" th:href="@{/style/mdb.css}" href="../../style/mdb.css" />-->
 
     <script th:src="@{/js/jquery-3.2.1.min.js}" src="../../js/jquery-3.2.1.min.js" />
     <script th:src="@{/js/blocks.js}" src="../../js/blocks.js" />
+
+    <!--Morris Charts-->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js" />
+    <script th:src="@{/js/morris.js}" src="../../js/morris.js" />
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.min.js"></script>
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.min.css"/>
+    <link rel="stylesheet" th:href="@{/style/morris.css}" href="../../style/morris.css" />
+
+    <script th:src="@{/js/trend.js}" src="../../js/trend.js" />
 </head>
 <body>
 
@@ -20,23 +28,16 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
-                <li><a href="\trend">Trends</a></li>
+                <li><a href="/home">Home</a></li>
+                <li class="active"><a href="#about">Trends</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
 <div class="container">
-    <div class="block-container col-xs-12">
-        <div class="block-row col-xs-12 row">
-            <div th:each="bl : ${blocks}"  class="col-xs-12 block-item hoverable" th:classappend="${bl.color.value}">
-                <span  th:text="${bl.name}"></span>
-            </div>
-        </div>
-    </div>
-
+    <div id="graph"></div>
 </div>
-
 </body>
+
 </html>
