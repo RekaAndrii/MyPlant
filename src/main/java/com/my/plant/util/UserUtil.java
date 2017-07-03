@@ -7,6 +7,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class UserUtil {
 
+    private UserUtil() {
+        super();
+    }
+
     public static String getLogginedUserName(){
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }

@@ -44,9 +44,9 @@ public class TrendServiceImpl implements TrendService {
 
     private void initWeekDays(Map<DayOfWeek, Map<String, Integer>> map){
         List<DayOfWeek> dayOfWeeks = Arrays.asList(DayOfWeek.values());
-        dayOfWeeks.forEach(dayOfWeek -> {
-            map.put(dayOfWeek, new TreeMap<String, Integer>());
-        });
+        dayOfWeeks.forEach(dayOfWeek ->
+            map.put(dayOfWeek, new TreeMap<String, Integer>())
+        );
 
     }
 }

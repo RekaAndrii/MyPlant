@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,7 +15,6 @@ import java.util.List;
  */
 @Service
 public class BlockServiceImpl implements BlockService{
-    private List<Block> blocks = new ArrayList<>();
 
     @Autowired
     private MongoTemplate mongoTemplate;
