@@ -25,7 +25,7 @@ Morris.Bar({
     trend.data["THURSDAY"],
     trend.data["FRIDAY"],
     trend.data["SATURDAY"],
-    trend.data["MONDAY"]
+    trend.data["SUNDAY"]
   ],
   xkey: 'day',
   ykeys: trend.yValues,
@@ -56,7 +56,7 @@ function initWeekDays(trend){
     trend.data["THURSDAY"].day = "THURSDAY";
     trend.data["FRIDAY"].day = "FRIDAY";
     trend.data["SATURDAY"].day = "SATURDAY";
-    trend.data["MONDAY"].day = "MONDAY";
+    trend.data["SUNDAY"].day = "SUNDAY";
 }
 
 }

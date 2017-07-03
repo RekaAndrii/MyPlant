@@ -3,6 +3,7 @@ package com.my.plant.service.impl;
 import com.my.plant.model.HistoryItem;
 import com.my.plant.service.HistoryService;
 import com.my.plant.service.TrendService;
+import com.my.plant.util.UserUtil;
 import com.my.plant.util.dto.TrendDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class TrendServiceImpl implements TrendService {
         Map<DayOfWeek, Map<String, Integer>> activitiesPerDay = new TreeMap<>();
         initWeekDays(activitiesPerDay);
         Set<String> yValues = new HashSet<>();
-        List<HistoryItem> historyItems = historyService.getAll();
+        List<HistoryItem> historyItems = historyService.getUserHistory(UserUtil.getLogginedUserName());
         historyItems.forEach(historyItem -> {
            Map<String, Integer> activitiesCountMap = activitiesPerDay.get(historyItem.getTime().getDayOfWeek());
             yValues.add(historyItem.getBlockName());

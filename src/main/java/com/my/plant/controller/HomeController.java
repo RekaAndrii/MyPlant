@@ -3,6 +3,7 @@ package com.my.plant.controller;
 import com.my.plant.model.Block;
 import com.my.plant.service.BlockService;
 import com.my.plant.util.ColorUtil;
+import com.my.plant.util.UserUtil;
 import com.my.plant.util.comparator.BlockComparator;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class HomeController {
 
     @RequestMapping(path = "home", method = RequestMethod.GET)
     public ModelAndView getHome(ModelAndView model){
-        List<Block> blocks =  blockService.getAllBlocks();
+        List<Block> blocks =  blockService.getAllBlocks(UserUtil.getLogginedUserName());
         ColorUtil.setColorToList(blocks);
         Collections.sort(blocks, blockComparator);
         

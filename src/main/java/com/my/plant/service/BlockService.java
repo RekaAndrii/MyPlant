@@ -9,12 +9,12 @@ import java.util.List;
  */
 public interface BlockService {
 
-    List<Block> getAllBlocks();
+    List<Block> getAllBlocks(String username);
 
-    Block findByName(String name);
+    Block findByName(String name, String username);
 
     void save(Block block);
 
-    void remove(String name);
+    void remove(String name, String username);
 
 }

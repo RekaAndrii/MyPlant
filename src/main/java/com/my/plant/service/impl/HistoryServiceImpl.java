@@ -19,15 +19,11 @@ public class HistoryServiceImpl implements HistoryService{
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    @Override
-    public List<HistoryItem> getAll() {
-        return mongoTemplate.findAll( HistoryItem.class);
-    }
 
     @Override
     public List<HistoryItem> getUserHistory(String username) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("username").is(username));
+        query.addCriteria(Criteria.where("userName").is(username));
         return mongoTemplate.find(query, HistoryItem.class);
     }
 

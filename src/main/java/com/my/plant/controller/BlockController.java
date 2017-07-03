@@ -5,6 +5,7 @@ import com.my.plant.model.HistoryAction;
 import com.my.plant.model.HistoryItem;
 import com.my.plant.service.BlockService;
 import com.my.plant.service.HistoryService;
+import com.my.plant.util.UserUtil;
 import com.my.plant.util.dto.AjaxResponse;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,8 @@ public class BlockController {
     @RequestMapping(value = "/execute", method = RequestMethod.GET)
     @ApiOperation(value = "executeBlock", nickname = "executeBlock")
     public @ResponseBody AjaxResponse executeBlock(@RequestParam(value = "name", required = false) String name){
-        Block block = blockService.findByName(name);
+        String userName = UserUtil.getLogginedUserName();
+        Block block = blockService.findByName(name, userName);
         if(block != null){
 
             block.setLastExecution(LocalDate.now());
@@ -45,7 +47,7 @@ public class BlockController {
 
     @GetMapping("/all")
     public @ResponseBody List<Block> getAll(){
-       return blockService.getAllBlocks();
+       return blockService.getAllBlocks(UserUtil.getLogginedUserName());
     }
 
     @PostMapping(value = "/")
@@ -57,7 +59,7 @@ public class BlockController {
 
     @DeleteMapping(value = "/{name}")
     public @ResponseBody AjaxResponse delete(@PathVariable(name = "name") String blockName){
-        blockService.remove(blockName);
+        blockService.remove(blockName, UserUtil.getLogginedUserName());
         return new AjaxResponse(false, "Successfully executed");
     }
 

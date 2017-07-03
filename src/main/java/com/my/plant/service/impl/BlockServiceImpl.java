@@ -22,14 +22,17 @@ public class BlockServiceImpl implements BlockService{
     private MongoTemplate mongoTemplate;
 
     @Override
-    public List<Block> getAllBlocks() {
-        return mongoTemplate.findAll(Block.class);
+    public List<Block> getAllBlocks(String username) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("useName").is(username));
+        return mongoTemplate.find(query, Block.class);
     }
 
+
     @Override
-    public Block findByName(String name) {
+    public Block findByName(String name, String username) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("name").is(name));
+        query.addCriteria(new Criteria().andOperator(Criteria.where("name").is(name),Criteria.where("userName").is(username)));
         return mongoTemplate.findOne(query, Block.class);
     }
 
@@ -39,9 +42,9 @@ public class BlockServiceImpl implements BlockService{
     }
 
     @Override
-    public void remove(String name) {
+    public void remove(String name, String username) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("name").is(name));
+        query.addCriteria(new Criteria().andOperator(Criteria.where("name").is(name),Criteria.where("userName").is(username)));
         mongoTemplate.remove(query, Block.class);
     }
 }
