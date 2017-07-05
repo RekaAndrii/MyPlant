@@ -24,6 +24,8 @@ import java.util.List;
 @RequestMapping("/block")
 public class BlockController {
 
+    private static final String AJAX_OK_MESSAGE = "ok";
+
     @Autowired
     private HistoryService historyService;
 
@@ -37,12 +39,12 @@ public class BlockController {
         Block block = blockService.findByName(name, userName);
         if(block != null){
 
-            block.setLastExecution(LocalDate.now());
+            block.setLastExecution(LocalDateTime.now().minusHours(3).toLocalDate());
             blockService.save(block);
-            historyService.save(new HistoryItem(block.getUserName(), block.getName(), HistoryAction.EXECUTED,
+            historyService.save(new HistoryItem(UserUtil.getLogginedUserName(), block.getName(), HistoryAction.EXECUTED,
                     LocalDateTime.now()));
         }
-        return new AjaxResponse(false, "Successfully executed");
+        return new AjaxResponse(false, AJAX_OK_MESSAGE);
     }
 
     @GetMapping("/all")
@@ -54,13 +56,13 @@ public class BlockController {
     public @ResponseBody AjaxResponse create(@RequestBody  Block block){
         block.setCreationDate(LocalDate.now());
         blockService.save(block);
-        return new AjaxResponse(false, "Successfully executed");
+        return new AjaxResponse(false, AJAX_OK_MESSAGE);
     }
 
     @DeleteMapping(value = "/{name}")
     public @ResponseBody AjaxResponse delete(@PathVariable(name = "name") String blockName){
         blockService.remove(blockName, UserUtil.getLogginedUserName());
-        return new AjaxResponse(false, "Successfully executed");
+        return new AjaxResponse(false, AJAX_OK_MESSAGE);
     }
 
 
