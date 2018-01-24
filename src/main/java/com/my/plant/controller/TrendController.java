@@ -35,8 +35,7 @@ public class TrendController {
     @GetMapping(path = "/trend/countPetDay")
     public @ResponseBody TrendDto<Map<DayOfWeek, Map<String, Integer>>> getCountPerDay(@RequestParam(required = false) String time) {
         TrendDto<Map<DayOfWeek, Map<String, Integer>>> trend;
-
-        if(time.toUpperCase().equals("MONTH")){
+        if(time != null && time.toUpperCase().equals("MONTH")){
             trend = trendService.getBlockTrendPerDay(LocalDate.now().minusMonths(1));
         }else{
              trend = trendService.getBlockTrendPerDay(null);
