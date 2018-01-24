@@ -5,10 +5,12 @@ import com.my.plant.service.HistoryService;
 import com.my.plant.service.TrendService;
 import com.my.plant.util.UserUtil;
 import com.my.plant.util.dto.TrendDto;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,11 +24,14 @@ public class TrendServiceImpl implements TrendService {
     private HistoryService historyService;
 
 
-    public TrendDto<Map<DayOfWeek, Map<String, Integer>>> getBlockTrendPerDay(){
+    public TrendDto<Map<DayOfWeek, Map<String, Integer>>> getBlockTrendPerDay(LocalDate since){
         Map<DayOfWeek, Map<String, Integer>> activitiesPerDay = new TreeMap<>();
         initWeekDays(activitiesPerDay);
         Set<String> yValues = new HashSet<>();
         List<HistoryItem> historyItems = historyService.getUserHistory(UserUtil.getLogginedUserName());
+        if(since != null){
+            historyItems = historyItems.stream().filter(item -> item.getTime().toLocalDate().isAfter(since)).collect(Collectors.toList());
+        }
         historyItems.forEach(historyItem -> {
            Map<String, Integer> activitiesCountMap = activitiesPerDay.get(historyItem.getTime().getDayOfWeek());
             yValues.add(historyItem.getBlockName());

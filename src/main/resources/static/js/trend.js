@@ -8,7 +8,7 @@ function initBlocksPerDayChart(){
     var trend;
      $.ajax({
         async: false,
-        url: "/trend/countPetDay",
+        url: "/trend/countPetDay?time=month",
         success: function(result){
            trend = result;
         }

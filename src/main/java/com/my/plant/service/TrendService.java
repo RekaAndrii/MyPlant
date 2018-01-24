@@ -3,6 +3,7 @@ package com.my.plant.service;
 import com.my.plant.util.dto.TrendDto;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.Map;
 
 /**
@@ -10,5 +11,5 @@ import java.util.Map;
  */
 public interface TrendService {
 
-    TrendDto<Map<DayOfWeek, Map<String, Integer>>> getBlockTrendPerDay();
+    TrendDto<Map<DayOfWeek, Map<String, Integer>>> getBlockTrendPerDay(LocalDate since);
 }

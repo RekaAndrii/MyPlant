@@ -2,15 +2,18 @@ package com.my.plant.controller;
 
 import com.my.plant.service.TrendService;
 import com.my.plant.util.dto.TrendDto;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.Map;
 
 /**
@@ -30,7 +33,14 @@ public class TrendController {
     }
 
     @GetMapping(path = "/trend/countPetDay")
-    public @ResponseBody TrendDto<Map<DayOfWeek, Map<String, Integer>>> getCountPerDay(){
-        return trendService.getBlockTrendPerDay();
+    public @ResponseBody TrendDto<Map<DayOfWeek, Map<String, Integer>>> getCountPerDay(@RequestParam(required = false) String time) {
+        TrendDto<Map<DayOfWeek, Map<String, Integer>>> trend;
+
+        if(time.toUpperCase().equals("MONTH")){
+            trend = trendService.getBlockTrendPerDay(LocalDate.now().minusMonths(1));
+        }else{
+             trend = trendService.getBlockTrendPerDay(null);
+        }
+        return trend;
     }
 }
