@@ -1,5 +1,5 @@
 # Use a Java 17 JDK base image
-FROM openjdk:17-jdk-slim
+FROM docker.io/library/openjdk:17-jdk-slim
 
 # Set the working directory in the container
 WORKDIR /app
