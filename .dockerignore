@@ -1,0 +1,12 @@
+# Exclude target directory as it contains build artifacts
+target/
+
+# Exclude application logs
+*.log
+
+# Exclude operating system files
+.DS_Store
+
+# Exclude IntelliJ project files
+*.iml
+.idea/
