@@ -4,7 +4,6 @@ FROM maven:3.9.6-amazoncorretto-17 AS build
 WORKDIR /app
 COPY pom.xml ./
 COPY src ./src
-COPY src/main/resources/application.properties ./src/main/resources/application.properties
 
 RUN mvn -B package -DskipTests
 
