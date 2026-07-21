@@ -14,6 +14,15 @@ spring:
     encoding: UTF-8
     content-type: text/html # ;charset=<encoding> is added
     cache: false # set to false for hot refresh
+  web:
+    resources:
+      cache:
+        period: 0
+      chain:
+        cache: false
+  devtools:
+    livereload:
+      enabled: true
 
 server:
   port: ${PORT:8080}

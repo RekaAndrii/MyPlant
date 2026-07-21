@@ -30,6 +30,19 @@ The application will start on:
 
 - http://localhost:8080
 
+## Hot UI Reload (No Redeploy)
+UI/template changes can be picked up during local development without rebuilding the jar.
+
+- Run app normally: `./mvnw spring-boot:run` (or `./mvnw.cmd spring-boot:run` on Windows)
+- Edit files under `src/main/resources/templates` or `src/main/resources/static`
+- Refresh browser to see updates
+
+Notes:
+
+- `spring.thymeleaf.cache` is disabled for template refresh
+- Static resource cache is disabled for CSS/JS updates
+- Spring DevTools LiveReload is enabled (use a browser LiveReload extension for auto-refresh)
+
 ## Run with Docker
 Build the image:
 

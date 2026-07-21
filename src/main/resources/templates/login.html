@@ -2,42 +2,66 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>My Plant</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <link rel="stylesheet" th:href="@{/style/bootstrap.css}" href="../../style/bootstrap.css" />
+    <link rel="stylesheet" th:href="@{/style/login.css}" href="../../style/login.css" />
 
     <script th:src="@{/js/jquery-3.2.1.min.js}" src="../../js/jquery-3.2.1.min.js"></script>
 </head>
-<body>
-    <nav class="navbar navbar-inverse">
+<body class="login-page">
+    <nav class="navbar navbar-inverse login-nav">
+        <div class="container">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/home">My Brick Plant</a>
             </div>
-            <div id="navbar" class="collapse navbar-collapse">
-                <ul class="nav navbar-nav">
-                </ul>
-            </div>
+        </div>
     </nav>
 
-    <!--<div th:if="${param.error}">-->
-        <!--Invalid username and password.-->
-    <!--</div>-->
-    <!--<div th:if="${param.logout}">-->
-        <!--You have been logged out.-->
-    <!--</div>-->
-    <div class="col-xs-12">
+    <div class="container login-wrapper">
         <div class="row">
-            <div class="col-md-4 col-md-offset-1">
-                <form th:action="@{/login}" method="post">
-                    <div class="form-group">
-                        <label for="username">Email address</label>
-                        <input type="text" name="username" class="form-control" id="username" placeholder="Email"/>
+            <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-5 col-md-offset-4">
+                <div class="panel panel-default login-card">
+                    <div class="panel-body">
+                        <h2 class="login-title">Sign In</h2>
+                        <p class="login-subtitle">Use your account to access My Brick Plant.</p>
+
+                        <div class="alert alert-danger" role="alert" th:if="${param.error}">
+                            Invalid username or password.
+                        </div>
+                        <div class="alert alert-success" role="alert" th:if="${param.logout}">
+                            You have been logged out.
+                        </div>
+
+                        <form th:action="@{/login}" method="post" novalidate>
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    class="form-control"
+                                    id="username"
+                                    placeholder="Enter username"
+                                    autocomplete="username"
+                                    required
+                                    autofocus />
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    class="form-control"
+                                    id="password"
+                                    placeholder="Enter password"
+                                    autocomplete="current-password"
+                                    required />
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" name="password" class="form-control" id="password" placeholder="Password"/>
-                    </div>
-                    <button type="submit" class="btn btn-default">Submit</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
