@@ -7,7 +7,7 @@ import com.my.plant.service.BlockService;
 import com.my.plant.service.HistoryService;
 import com.my.plant.util.UserUtil;
 import com.my.plant.util.dto.AjaxResponse;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +33,7 @@ public class BlockController {
     private BlockService blockService;
 
     @RequestMapping(value = "/execute", method = RequestMethod.GET)
-    @ApiOperation(value = "executeBlock", nickname = "executeBlock")
+    @Operation(summary = "executeBlock", operationId = "executeBlock")
     public @ResponseBody AjaxResponse executeBlock(@RequestParam(value = "name", required = false) String name){
         String userName = UserUtil.getLogginedUserName();
         Block block = blockService.findByName(name, userName);
@@ -55,6 +55,7 @@ public class BlockController {
     @PostMapping(value = "/")
     public @ResponseBody AjaxResponse create(@RequestBody  Block block){
         block.setCreationDate(LocalDate.now());
+        block.setUserName(UserUtil.getLogginedUserName());
         blockService.save(block);
         return new AjaxResponse(false, AJAX_OK_MESSAGE);
     }

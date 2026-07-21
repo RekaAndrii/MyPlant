@@ -5,18 +5,14 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 
 import javax.annotation.PostConstruct;
 import java.util.TimeZone;
 
 @Configuration
 @ComponentScan
-@EnableSwagger2
 @EnableAutoConfiguration
 public class MyPlantApplication {
 
@@ -30,18 +26,10 @@ public class MyPlantApplication {
 	}
 
 	@Bean
-	public Docket newsApi() {
-		return new Docket(DocumentationType.SWAGGER_2)
-				.apiInfo(apiInfo())
-				.select()
-				.build();
-	}
-
-	private ApiInfo apiInfo() {
-		return new ApiInfoBuilder()
+	public OpenAPI newsApi() {
+		return new OpenAPI().info(new Info()
 				.title("My plant application to grow")
 				.description("It is app that helps you grow")
-				.version("2.0")
-				.build();
+				.version("2.0"));
 	}
 }

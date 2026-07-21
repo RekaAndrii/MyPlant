@@ -1,36 +1,26 @@
 package com.my.plant.configs;
 
-import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
+import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
+import org.springframework.util.StringUtils;
 
-import static java.util.Collections.singletonList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Created by User on 04.06.2017.
  */
 @Configuration
-public class MongoConfiguration extends AbstractMongoConfiguration {
+public class MongoConfiguration extends AbstractMongoClientConfiguration {
 
-    @Value("${spring.data.mongodb.port}")
-    private Integer mongoPort;
-
-    @Value("${spring.data.mongodb.host}")
-    private String mongoHost;
-
-    @Value("${spring.data.mongodb.database}")
+    @Value("${spring.data.mongodb.database:}")
     private String mongoDB;
 
-    @Value("${spring.data.mongodb.username}")
-    private String mongoUser;
-
-    @Value("${spring.data.mongodb.password}")
-    private String mongoPassword;
+    @Value("${spring.data.mongodb.uri:}")
+    private String mongoUri;
 
     @Override
     protected String getDatabaseName() {
@@ -38,9 +28,16 @@ public class MongoConfiguration extends AbstractMongoConfiguration {
     }
 
     @Override
-    @Bean
-    public Mongo mongo() throws Exception {
-        return new MongoClient(singletonList(new ServerAddress(this.mongoHost, this.mongoPort)), singletonList(
-                MongoCredential.createCredential(this.mongoUser, mongoDB, this.mongoPassword.toCharArray())));
+    public MongoClient mongoClient() {
+        if (StringUtils.hasText(mongoUri)) {
+            return MongoClients.create(mongoUri);
+        }
+
+        return MongoClients.create();
+    }
+
+    @Override
+    protected Collection<String> getMappingBasePackages() {
+        return Collections.singleton("com.my.plant");
     }
 }

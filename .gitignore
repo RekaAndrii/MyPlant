@@ -1,5 +1,9 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
+.env
+cookies.txt
+cookies8081.txt
+.vscode/
 
 ### STS ###
 .apt_generated

@@ -1,15 +1,20 @@
-# Use a Java 17 JDK base image
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:11-jdk AS build
 
-# Set the working directory in the container
+WORKDIR /workspace
+
+COPY mvnw pom.xml ./
+COPY .mvn .mvn
+RUN chmod +x mvnw
+
+COPY src src
+RUN ./mvnw -DskipTests clean package
+
+FROM eclipse-temurin:11-jre
+
 WORKDIR /app
 
-# Add application JAR file to the container
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
+COPY --from=build /workspace/target/*.jar app.jar
 
-# Expose the application port
 EXPOSE 8080
 
-# Command to run the application
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

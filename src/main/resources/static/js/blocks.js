@@ -23,4 +23,24 @@ function initBlockEvent(){
                 }
             }});
     });
+
+    $("#addBlockBtn").click(function(){
+        var blockName = $("#newBlockName").val().trim();
+        if(!blockName){
+            return;
+        }
+
+        $.ajax({
+            url: "/block/",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({name: blockName}),
+            success: function(result){
+                if(result.hasError == false){
+                    $("#newBlockName").val("");
+                    window.location.reload();
+                }
+            }
+        });
+    });
 }

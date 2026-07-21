@@ -1,16 +1,12 @@
-server:
-  port: 8080
-#MongoDB configs uri: mongodb://myplantdbuser:myplantpass@ds111461.mlab.com:11461/heroku_qm1q82dh
 spring:
+  config:
+    import: optional:file:./.env[.properties]
   data:
     mongodb:
-      host: ds111461.mlab.com
-      port: 11461
-      database: heroku_qm1q82dh
-      username: myplantdbuser
-      password: myplantpass
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE:MyPlant}
 
-# THYMELEAF (ThymeleafAutoConfiguration)
+  # THYMELEAF (ThymeleafAutoConfiguration)
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html
@@ -18,6 +14,12 @@ spring:
     encoding: UTF-8
     content-type: text/html # ;charset=<encoding> is added
     cache: false # set to false for hot refresh
+
+server:
+  port: ${PORT:8080}
+
+#MongoDB configs uri: mongodb://myplantdbuser:myplantpass@ds111461.mlab.com:11461/heroku_qm1q82dh
+#mongodb://rekaandrii_db_user:<db_password>@ac-uzt1wez-shard-00-00.jkglvhb.mongodb.net:27017,ac-uzt1wez-shard-00-01.jkglvhb.mongodb.net:27017,ac-uzt1wez-shard-00-02.jkglvhb.mongodb.net:27017/?ssl=true&replicaSet=atlas-6wrl1y-shard-0&authSource=admin&appName=MyPlant
 ---
 
 spring:
