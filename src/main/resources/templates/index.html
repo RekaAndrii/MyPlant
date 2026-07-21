@@ -47,8 +47,10 @@
 
     <div class="block-container col-xs-12">
         <div class="block-row col-xs-12 row">
-            <div th:each="bl : ${blocks}"  class="col-xs-12 block-item hoverable" th:classappend="${bl.color.value}">
-                <span  th:text="${bl.name}"></span>
+            <div th:each="bl : ${blocks}" class="col-xs-4 block-col">
+                <div class="block-item hoverable" th:classappend="${bl.color.value}">
+                    <span  th:text="${bl.name}"></span>
+                </div>
             </div>
         </div>
     </div>
