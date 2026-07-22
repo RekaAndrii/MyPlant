@@ -10,7 +10,7 @@ spring:
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html
-    mode: HTML5
+    mode: HTML
     encoding: UTF-8
     content-type: text/html # ;charset=<encoding> is added
     cache: false # set to false for hot refresh
@@ -42,8 +42,12 @@ management:
 ---
 
 spring:
-    profiles: development
+  config:
+    activate:
+      on-profile: development
 
 ---
 spring:
-    profiles: locale
+  config:
+    activate:
+      on-profile: locale
