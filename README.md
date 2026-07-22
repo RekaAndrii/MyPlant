@@ -30,6 +30,10 @@ The application will start on:
 
 - http://localhost:8080
 
+## Deployment
+- Deployed on [Render Dashboard](https://dashboard.render.com/)
+- Monitored in [UptimeRobot](https://dashboard.uptimerobot.com/) using the health endpoint
+
 ## Hot UI Reload (No Redeploy)
 UI/template changes can be picked up during local development without rebuilding the jar.
 

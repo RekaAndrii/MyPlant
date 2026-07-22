@@ -20,7 +20,6 @@ import java.util.Map;
  * Created by User on 30.06.2017.
  */
 @Controller
-@RequestMapping("/")
 public class TrendController {
 
     @Autowired
@@ -32,7 +31,7 @@ public class TrendController {
         return model;
     }
 
-    @GetMapping(path = "/trend/countPetDay")
+    @GetMapping(path = "/trend/countPerDay")
     public @ResponseBody TrendDto<Map<DayOfWeek, Map<String, Integer>>> getCountPerDay(@RequestParam(required = false) String time) {
         TrendDto<Map<DayOfWeek, Map<String, Integer>>> trend;
         if(time != null && time.toUpperCase().equals("MONTH")){
