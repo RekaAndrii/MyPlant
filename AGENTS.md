@@ -1,33 +1,130 @@
 # AGENTS instructions for MyPlant
 
 ## Project overview
-- This repository is a Spring Boot 1.5.2 application for a small plant-tracking web app.
-- The main entry point is [src/main/java/com/my/plant/configs/MyPlantApplication.java](src/main/java/com/my/plant/configs/MyPlantApplication.java).
-- Server-rendered views use Thymeleaf under [src/main/resources/templates](src/main/resources/templates), with static assets in [src/main/resources/static](src/main/resources/static).
-- Persistence uses Spring Data MongoDB and MongoTemplate; the main data-access implementation is in [src/main/java/com/my/plant/service/impl/BlockServiceImpl.java](src/main/java/com/my/plant/service/impl/BlockServiceImpl.java).
+- Spring Boot **3.3.5** application (Java 21 source level, runs on JDK 21 in Docker) for a plant-tracking web app.
+- Main entry point: [src/main/java/com/my/plant/configs/MyPlantApplication.java](src/main/java/com/my/plant/configs/MyPlantApplication.java)
+- Server-rendered views use Thymeleaf: [src/main/resources/templates](src/main/resources/templates); static assets in [src/main/resources/static](src/main/resources/static).
+- Persistence: `MongoTemplate` (primary). `BlockRepository` (extends `MongoRepository`) exists but is dead code — do not use it.
+- Security: stateful session-based auth via `SecurityFilterChain @Bean` in [src/main/java/com/my/plant/configs/WebSecurityConfig.java](src/main/java/com/my/plant/configs/WebSecurityConfig.java).
+- API docs available at `/swagger-ui.html` (Springdoc OpenAPI 2.6.0).
 
 ## Code organization
-- Keep the existing package structure:
-  - Controllers: [src/main/java/com/my/plant/controller](src/main/java/com/my/plant/controller)
-  - Service interfaces: [src/main/java/com/my/plant/service](src/main/java/com/my/plant/service)
-  - Service implementations: [src/main/java/com/my/plant/service/impl](src/main/java/com/my/plant/service/impl)
-  - Models: [src/main/java/com/my/plant/model](src/main/java/com/my/plant/model)
-  - Utilities: [src/main/java/com/my/plant/util](src/main/java/com/my/plant/util)
-- Controllers should stay thin; put business logic in the service layer.
-- Follow the existing style of plain Spring annotations and Java 8 code; avoid introducing newer frameworks or Lombok unless explicitly requested.
+Keep the existing package structure — do not introduce new top-level packages:
+- `configs/`     — Spring Boot app entry point, security, MongoDB, MVC configuration
+- `controller/`  — Thin HTTP handlers only; no business logic
+- `service/`     — Service interfaces
+- `service/impl/` — Service implementations annotated `@Service`
+- `model/`       — MongoDB document classes (`@Document`)
+- `repository/`  — Unused `MongoRepository` stub; do not add to this layer
+- `util/`        — Stateless helpers, comparators (`util/comparator/`), enums (`util/constant/`), DTOs (`util/dto/`)
 
-## Runtime and configuration
-- Application settings live in [src/main/resources/application.yml](src/main/resources/application.yml).
-- Security is configured in [src/main/java/com/my/plant/configs/WebSecurityConfig.java](src/main/java/com/my/plant/configs/WebSecurityConfig.java).
-- The app expects MongoDB connectivity to be available through the configured Spring properties.
+## Build and test commands
 
-## Build and test
-- Use the Maven wrapper for verification:
-  - Unix-like shells: `./mvnw test`
-  - Windows: `mvnw.cmd test`
-- Keep changes small and targeted unless a broader refactor is explicitly requested.
+**Run all tests (Windows):**
+```
+mvnw.cmd test
+```
+
+**Run all tests (Unix):**
+```
+./mvnw test
+```
+
+**Run a single test class:**
+```
+mvnw.cmd test -Dtest=HexEncodingTest
+./mvnw test -Dtest=HexEncodingTest
+```
+
+**Run a single test method:**
+```
+mvnw.cmd test -Dtest=HexEncodingTest#hexEncodingRoundTripShouldWork
+./mvnw test -Dtest=HexEncodingTest#hexEncodingRoundTripShouldWork
+```
+
+**Compile without running tests:**
+```
+mvnw.cmd compile
+./mvnw compile
+```
+
+**Full build (skip tests):**
+```
+mvnw.cmd package -DskipTests
+./mvnw package -DskipTests
+```
+
+There is no lint or code-format enforcer configured. There are no Cursor rules or Copilot instructions files in this repo.
+
+## Runtime configuration
+Settings live in [src/main/resources/application.yml](src/main/resources/application.yml). The app reads secrets from a `.env` file via `spring.config.import: optional:file:./.env[.properties]`.
+
+Required environment variables:
+- `MONGODB_URI` — MongoDB connection string (required)
+- `MONGODB_DATABASE` — database name (optional, defaults to `MyPlant`)
+- `PORT` — server port (optional, defaults to `8080`)
+
+The JVM default timezone is forced to `Europe/Kiev` in `MyPlantApplication.@PostConstruct`. `BlockController.executeBlock` additionally applies `.minusHours(3)` when writing `lastExecution` — a hardcoded UTC+3 offset. Do not remove this without updating both.
+
+## Naming conventions
+- **Packages**: lowercase singular nouns (`controller`, `service`, `model`, `util`)
+- **Classes**: `PascalCase`; service implementations follow `<Interface>Impl` (e.g., `BlockServiceImpl`)
+- **Interfaces**: plain name, no `I` prefix (e.g., `BlockService`)
+- **Methods/fields**: `camelCase`
+- **Constants**: `UPPER_SNAKE_CASE`
+- **MongoDB field name**: `userName` (camelCase) — used consistently in all models and queries
+- **Preserved typo**: `getLogginedUserName()` in `UserUtil` (double-`g`) — all callers use this exact spelling; do not rename it
+
+## Annotation and injection style
+- Use **field injection** with `@Autowired` (the existing style); do not switch to constructor injection unless explicitly asked.
+- Use `@Service`, `@Controller`, `@Repository`, `@Configuration` for stereotypes.
+- Both `@RequestMapping(method = RequestMethod.GET)` and shorthand annotations (`@GetMapping`, `@PostMapping`, `@DeleteMapping`) appear in the codebase — prefer shorthand for new endpoints but do not normalize existing ones.
+- Apply `@Operation(summary=..., operationId=...)` only to endpoints that need Swagger documentation.
+- Do not add Lombok — all models use manually written no-arg constructors, full-arg constructors, getters, and setters.
+
+## Data access pattern
+- **Always use `MongoTemplate`** — inject it directly into `@Service` implementations.
+- Build queries with `new Query()` + `query.addCriteria(Criteria.where("field").is(value))`.
+- For multi-field AND conditions use `new Criteria().andOperator(Criteria.where(...), Criteria.where(...))`.
+- **Every query must be scoped by `userName`** — the app is multi-tenant by username.
+- New document classes go in `model/`, annotated `@Document(collection = "collectionName")`, with `@Id` on the `_id` field.
+- `@Transient` fields are computed at read-time and never persisted (e.g., `Block.color`).
+
+## Controller pattern
+- View-rendering controllers return `ModelAndView`, call `model.setViewName("template")` and `model.addObject("key", value)`.
+- REST/AJAX endpoints are on a `@Controller @ResponseBody` class (like `BlockController`) or use `@RestController`.
+- AJAX success responses return `new AjaxResponse(false, "ok")`.
+- Resolve the current user inline: `UserUtil.getLogginedUserName()` — do not thread username as a method parameter through service layers.
+- Record history events in the **controller** (see `BlockController.executeBlock`), not inside service methods.
+
+## Error handling
+- In view controllers, wrap service calls in `try/catch`, log with `LOGGER.error(message, ex)`, and add an `"errorMessage"` string to the model — do not let exceptions propagate to the user as stack traces.
+- AJAX controllers currently return `AjaxResponse(false, "ok")` for all success paths with no dedicated error response path — match this pattern unless adding structured error handling is explicitly requested.
+- No `@ControllerAdvice` or global exception handler exists; add one only if explicitly asked.
+- Use `LoggerFactory.getLogger(ClassName.class)` for loggers; declare them `private static final Logger LOGGER`.
+
+## Code formatting
+- 4-space indentation; opening braces on the same line.
+- Java 8 features: `LocalDate`/`LocalDateTime`, streams, lambdas — all acceptable.
+- Do **not** use `Optional` — the codebase uses manual null checks throughout.
+- Wildcard imports (`java.util.*`, `org.springframework.web.bind.annotation.*`) are acceptable where a package has many used classes.
+- Class-level Javadoc is the `/** Created by User on DD.MM.YYYY. */` style; do not add elaborate Javadoc unless asked.
+
+## Color / staleness logic
+- `ColorUtil.setColor(Block)` assigns `@Transient BlockColor`:
+  - Same day → `GREEN`; 1 day ago → `YELLOW`; 2+ days or `null` → `RED`
+- Blocks are sorted by `lastExecution` ascending (oldest/never-executed first) in `HomeController`.
+- `BlockColor` values are CSS class names (`"red"`, `"yellow"`, `"green"`) applied in Thymeleaf via `th:classappend="${bl.color.value}"`.
+
+## Frontend conventions
+- jQuery 3.2.1, Bootstrap 4, Morris.js (bar charts), Raphael — all bundled under `src/main/resources/static/`.
+- Do not add npm, a bundler, or transpilation steps — all JS is plain ES5-compatible.
+- AJAX calls in `blocks.js` use `$.ajax`; follow the same pattern for any new client-side requests.
+- Thymeleaf templates use `th:each`, `th:classappend`, `th:if`, and `th:text`; keep the same dialect.
 
 ## When making changes
-- Prefer matching the existing naming, annotation style, and return types used in the current controllers and services.
-- If adding or changing endpoints, keep them consistent with the patterns in [src/main/java/com/my/plant/controller/BlockController.java](src/main/java/com/my/plant/controller/BlockController.java).
-- If changing data access, update the service interface and implementation rather than introducing a new persistence pattern.
+- Keep controllers thin — move logic to the service layer.
+- New endpoints must follow `BlockController.java` patterns (method annotations, `@ResponseBody`, `AjaxResponse` return type).
+- Changing data access means updating the service interface **and** its implementation — never bypass the service layer from a controller.
+- Do not introduce new persistence patterns (e.g., reactive repositories, JPA) without an explicit request.
+- Keep changes small and targeted; avoid unsolicited refactors.

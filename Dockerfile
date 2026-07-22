@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11-jdk AS build
+FROM eclipse-temurin:21-jdk AS build
 
 WORKDIR /workspace
 
@@ -9,7 +9,7 @@ RUN chmod +x mvnw
 COPY src src
 RUN ./mvnw -DskipTests clean package
 
-FROM eclipse-temurin:11-jre
+FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
