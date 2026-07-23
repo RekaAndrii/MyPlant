@@ -8,4 +8,6 @@ public interface UserService {
     boolean emailExists(String email);
 
     void register(String userName, String email, String rawPassword);
+
+    void deleteCurrentUser(String userName);
 }

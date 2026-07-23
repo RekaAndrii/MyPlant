@@ -1,5 +1,7 @@
 package com.my.plant.service.impl;
 
+import com.my.plant.model.Block;
+import com.my.plant.model.HistoryItem;
 import com.my.plant.model.User;
 import com.my.plant.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +50,15 @@ public class UserServiceImpl implements UserService {
         }
         String encodedPassword = passwordEncoder.encode(rawPassword);
         mongoTemplate.save(new User(userName, email, encodedPassword));
+    }
+
+    @Override
+    public void deleteCurrentUser(String userName) {
+        // Delete all blocks belonging to this user
+        mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), Block.class);
+        // Delete all history items belonging to this user
+        mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), HistoryItem.class);
+        // Delete the user record
+        mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), User.class);
     }
 }
