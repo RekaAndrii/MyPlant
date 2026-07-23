@@ -1,0 +1,44 @@
+package com.my.plant.service.impl;
+
+import com.my.plant.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.stereotype.Service;
+
+/**
+ * Created by User on 23.07.2026.
+ */
+@Service
+public class CompositeUserDetailsService implements UserDetailsService {
+
+    private final InMemoryUserDetailsManager inMemoryManager = new InMemoryUserDetailsManager(
+            org.springframework.security.core.userdetails.User
+                    .withUsername("andrii").password("{noop}").roles("USER").build(),
+            org.springframework.security.core.userdetails.User
+                    .withUsername("taras").password("{noop}password").roles("USER").build()
+    );
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("email").is(username));
+        User mongoUser = mongoTemplate.findOne(query, User.class);
+        if (mongoUser != null) {
+            return org.springframework.security.core.userdetails.User
+                    .withUsername(mongoUser.getUserName())
+                    .password(mongoUser.getPassword())
+                    .roles("USER")
+                    .build();
+        }
+        return inMemoryManager.loadUserByUsername(username);
+    }
+}
