@@ -1,0 +1,8 @@
+{
+  "name": "My Brick Plant",
+  "short_name": "MyPlant",
+  "display": "standalone",
+  "start_url": "/home",
+  "background_color": "#222222",
+  "theme_color": "#222222"
+}

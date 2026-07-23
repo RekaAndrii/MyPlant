@@ -7,9 +7,35 @@
     <link rel="stylesheet" th:href="@{/style/bootstrap.css}" href="../../style/bootstrap.css" />
     <link rel="stylesheet" th:href="@{/style/blocks.css}" href="../../style/blocks.css" />
     <!--<link rel="stylesheet" th:href="@{/style/mdb.css}" href="../../style/mdb.css" />-->
+    <link rel="manifest" th:href="@{/manifest.json}" />
 
     <script th:src="@{/js/jquery-3.2.1.min.js}" src="../../js/jquery-3.2.1.min.js"></script>
     <script th:src="@{/js/blocks.js}" src="../../js/blocks.js"></script>
+    <script>
+        (function () {
+            var STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+            var hiddenAt = null;
+
+            // iOS bfcache restore: page is served from frozen snapshot
+            window.addEventListener('pageshow', function (e) {
+                if (e.persisted) {
+                    window.location.reload();
+                }
+            });
+
+            // Tab/app becomes hidden — record the time
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'hidden') {
+                    hiddenAt = Date.now();
+                } else if (document.visibilityState === 'visible' && hiddenAt !== null) {
+                    if (Date.now() - hiddenAt >= STALE_THRESHOLD_MS) {
+                        window.location.reload();
+                    }
+                    hiddenAt = null;
+                }
+            });
+        })();
+    </script>
 </head>
 <body>
 

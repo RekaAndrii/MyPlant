@@ -128,3 +128,15 @@ The JVM default timezone is forced to `Europe/Kiev` in `MyPlantApplication.@Post
 - Changing data access means updating the service interface **and** its implementation — never bypass the service layer from a controller.
 - Do not introduce new persistence patterns (e.g., reactive repositories, JPA) without an explicit request.
 - Keep changes small and targeted; avoid unsolicited refactors.
+
+## Available Skills
+
+Skills live under `.github/skills/`. Read the corresponding `SKILL.md` before executing. Trigger automatically on matching user phrases.
+
+| Skill | Location | Trigger phrases |
+|---|---|---|
+| **myplant-e2e-test** | `.github/skills/myplant-e2e-test/` | run e2e test, smoke test, quick e2e, end-to-end test, full flow test, test user registration to cleanup |
+| **myplant-run-and-token-saver** | `.github/skills/myplant-run-and-token-saver/` | run app, start app, start service, launch MyPlant, health check, reduce tokens, concise output |
+| **myplant-verify-running** | `.github/skills/myplant-verify-running/` | verify app is running, is app up, check app status, check service health, ping app |
+| **myplant-free-8080** | `.github/skills/myplant-free-8080/` | free 8080, kill process on 8080, stop port 8080, use 8080, do not use 8181 |
+| **myplant-commit-with-push-confirmation** | `.github/skills/myplant-commit-with-push-confirmation/` | commit changes, create commit, git commit, save to git, push changes, commit and push |
