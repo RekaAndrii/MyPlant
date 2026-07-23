@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>My Plant</title>
+    <title>Register - My Plant</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -24,20 +24,21 @@
             <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-5 col-md-offset-4">
                 <div class="panel panel-default login-card">
                     <div class="panel-body">
-                        <h2 class="login-title">Sign In</h2>
-                        <p class="login-subtitle">Use your account to access My Brick Plant.</p>
+                        <h2 class="login-title">Create Account</h2>
+                        <p class="login-subtitle">Register to access My Brick Plant.</p>
 
-                        <div class="alert alert-danger" role="alert" th:if="${param.error}">
-                            Invalid username or password.
+                        <!-- Single Error Alert Box -->
+                        <div class="alert alert-danger" role="alert" th:if="${error}">
+                            <span th:text="${error}"></span>
                         </div>
-                        <div class="alert alert-success" role="alert" th:if="${param.logout}">
-                            You have been logged out.
-                        </div>
+
+                        <!-- Success Message (from redirect) -->
                         <div class="alert alert-success" role="alert" th:if="${message}">
                             <span th:text="${message}"></span>
                         </div>
 
-                        <form th:action="@{/login}" method="post" novalidate>
+                        <!-- Registration Form -->
+                        <form th:action="@{/register}" method="post" novalidate>
                             <div class="form-group">
                                 <label for="username">Username</label>
                                 <input
@@ -46,9 +47,20 @@
                                     class="form-control"
                                     id="username"
                                     placeholder="Enter username"
-                                    autocomplete="username"
                                     required
-                                    autofocus />
+                                    autofocus
+                                    th:value="${username}" />
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    class="form-control"
+                                    id="email"
+                                    placeholder="Enter email (example@domain.com)"
+                                    required
+                                    th:value="${email}" />
                             </div>
                             <div class="form-group">
                                 <label for="password">Password</label>
@@ -57,17 +69,16 @@
                                     name="password"
                                     class="form-control"
                                     id="password"
-                                    placeholder="Enter password"
-                                    autocomplete="current-password"
+                                    placeholder="Enter password (minimum 4 characters)"
                                     required />
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                            <button type="submit" class="btn btn-primary btn-block">Create Account</button>
                         </form>
-                        
+
                         <hr />
                         <p class="text-center" style="margin-top: 15px; margin-bottom: 0;">
-                            Don't have an account? 
-                            <a href="/register">Sign up here</a>
+                            Already have an account? 
+                            <a href="/login">Sign in here</a>
                         </p>
                     </div>
                 </div>

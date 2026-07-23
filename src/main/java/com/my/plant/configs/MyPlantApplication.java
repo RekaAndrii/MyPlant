@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 
@@ -14,6 +15,7 @@ import java.util.TimeZone;
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration
+@EnableMongoRepositories(basePackages = "com.my.plant.repository")
 public class MyPlantApplication {
 
 	@PostConstruct

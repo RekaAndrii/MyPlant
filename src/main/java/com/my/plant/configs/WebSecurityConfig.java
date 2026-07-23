@@ -1,5 +1,6 @@
 package com.my.plant.configs;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,12 +10,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import com.my.plant.service.impl.CustomUserDetailsService;
 
-/**
- * Created by User on 18.04.2017.
- */
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
@@ -24,7 +24,7 @@ public class WebSecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/js/**", "/style/**",
-                                "/login", "/quick/**", "/v3/api-docs/**", "/swagger-ui/**",
+                                "/login", "/register", "/quick/**", "/v3/api-docs/**", "/swagger-ui/**",
                                 "/swagger-ui.html", "/actuator/health", "/actuator/info").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
@@ -38,11 +38,27 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(
+    public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
+        InMemoryUserDetailsManager inMemory = new InMemoryUserDetailsManager(
                 User.withUsername("andrii").password("{noop}").roles("USER").build(),
                 User.withUsername("taras").password("{noop}password").roles("USER").build()
         );
+        
+        // Set the in-memory manager in CustomUserDetailsService to avoid circular dependency
+        CustomUserDetailsService.setInMemoryUserDetailsManager(inMemory);
+        
+        return inMemory;
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        // Return the CustomUserDetailsService which uses hybrid auth
+        return new CustomUserDetailsService();
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -50,3 +66,4 @@ public class WebSecurityConfig {
         return config.getAuthenticationManager();
     }
 }
+
