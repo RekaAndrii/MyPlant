@@ -1,5 +1,13 @@
 $(function() {
 
+    // Redirect to login if any AJAX call is intercepted by Spring Security
+    // (session expired: server returns 200 with the login page body)
+    $(document).ajaxComplete(function (event, xhr) {
+        if (xhr.responseURL && xhr.responseURL.indexOf('/login') !== -1) {
+            window.location.href = '/login';
+        }
+    });
+
     initBlockEvent();
     console.log( "ready!" );
 });
