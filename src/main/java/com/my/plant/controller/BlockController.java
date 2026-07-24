@@ -89,6 +89,17 @@ public class BlockController {
         return new AjaxResponse(false, AJAX_OK_MESSAGE);
     }
 
+    @PutMapping(value = "/{name}")
+    public @ResponseBody AjaxResponse update(@PathVariable(name = "name") String oldName,
+                                             @RequestBody Block block) {
+        String userName = UserUtil.getLogginedUserName();
+        blockService.update(oldName, block, userName);
+        if (!oldName.equals(block.getName())) {
+            historyService.renameBlock(oldName, block.getName(), userName);
+        }
+        return new AjaxResponse(false, AJAX_OK_MESSAGE);
+    }
+
     @DeleteMapping(value = "/{name}")
     public @ResponseBody AjaxResponse delete(@PathVariable(name = "name") String blockName) {
         blockService.remove(blockName, UserUtil.getLogginedUserName());

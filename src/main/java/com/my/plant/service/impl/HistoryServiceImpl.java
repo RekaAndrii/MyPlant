@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,5 +31,14 @@ public class HistoryServiceImpl implements HistoryService{
     @Override
     public void save(HistoryItem item) {
         mongoTemplate.save(item);
+    }
+
+    @Override
+    public void renameBlock(String oldName, String newName, String userName) {
+        Query query = new Query(new Criteria().andOperator(
+                Criteria.where("userName").is(userName),
+                Criteria.where("blockName").is(oldName)
+        ));
+        mongoTemplate.updateMulti(query, Update.update("blockName", newName), HistoryItem.class);
     }
 }

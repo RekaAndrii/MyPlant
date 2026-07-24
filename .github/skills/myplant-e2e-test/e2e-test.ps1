@@ -515,6 +515,96 @@ try {
     Write-Host "[FAIL] Block retrieval failed: $($_.Exception.Message)" -ForegroundColor Red
 }
 
+# ==================== EDIT / DELETE BLOCK PHASES ====================
+
+$BLOCK_RENAMED = "E2EEditedBlock"
+
+# Phase 5a: Edit block (rename)
+Write-Host ""
+Write-Host "PHASE 5a: Edit block (rename $BLOCK_NAME -> $BLOCK_RENAMED)..." -ForegroundColor Cyan
+
+try {
+    $editBody = @{ name = $BLOCK_RENAMED } | ConvertTo-Json
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/$BLOCK_NAME" -Method PUT -Body $editBody `
+        -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "EDIT BLOCK" "PASS" $resp.StatusCode "{hasError:false}"
+        Write-Host "[OK] Block renamed to $BLOCK_RENAMED" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "EDIT BLOCK" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Block edit returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "EDIT BLOCK" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] Block edit failed: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 5b: Verify renamed block present and old name gone
+Write-Host ""
+Write-Host "PHASE 5b: Verify block renamed..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $allBlocks = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    $renamedPresent = $allBlocks | Where-Object { $_.name -eq $BLOCK_RENAMED }
+    $oldGone = -not ($allBlocks | Where-Object { $_.name -eq $BLOCK_NAME })
+    if ($renamedPresent -and $oldGone) {
+        Add-ReportEntry "VERIFY RENAMED" "PASS" $resp.StatusCode "$BLOCK_RENAMED present, $BLOCK_NAME gone"
+        Write-Host "[OK] Rename verified: $BLOCK_RENAMED present, $BLOCK_NAME absent" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "VERIFY RENAMED" "FAIL" $resp.StatusCode "renamedPresent=$([bool]$renamedPresent) oldGone=$oldGone"
+        Write-Host "[FAIL] Rename verification failed" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY RENAMED" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 5c: Delete block
+Write-Host ""
+Write-Host "PHASE 5c: Delete block ($BLOCK_RENAMED)..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/$BLOCK_RENAMED" -Method DELETE `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "DELETE BLOCK" "PASS" $resp.StatusCode "{hasError:false}"
+        Write-Host "[OK] Block $BLOCK_RENAMED deleted" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "DELETE BLOCK" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Block delete returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "DELETE BLOCK" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] Block delete failed: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 5d: Verify deleted block is gone
+Write-Host ""
+Write-Host "PHASE 5d: Verify block deleted..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $allBlocks = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    $stillPresent = $allBlocks | Where-Object { $_.name -eq $BLOCK_RENAMED }
+    if (-not $stillPresent) {
+        Add-ReportEntry "VERIFY DELETED" "PASS" $resp.StatusCode "$BLOCK_RENAMED not in list"
+        Write-Host "[OK] Deleted block confirmed absent from block list" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "VERIFY DELETED" "FAIL" $resp.StatusCode "$BLOCK_RENAMED still present"
+        Write-Host "[FAIL] Block should have been deleted but still appears in list" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY DELETED" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# ==================== END EDIT / DELETE BLOCK PHASES ====================
+
 # Phase 6: Check Trends
 Write-Host ""
 Write-Host "PHASE 6: Check trends..." -ForegroundColor Cyan

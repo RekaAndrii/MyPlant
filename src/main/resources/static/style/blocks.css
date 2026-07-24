@@ -48,3 +48,143 @@
     font-size: 3em;
     font-weight: bold;
 }
+
+.add-block-btn {
+    background-color: #5a5a5a;
+    border: 2px dashed #888;
+    cursor: pointer;
+    color: #ccc;
+}
+
+.add-block-btn:hover {
+    background-color: #4a4a4a;
+    color: #fff;
+}
+
+.add-block-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-block-modal-dialog {
+    background: #2d2d2d;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 28px 32px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    color: #eee;
+}
+
+.add-block-modal-dialog .form-control {
+    background-color: #3a3a3a;
+    border: 1px solid #666;
+    color: #eee;
+}
+
+.add-block-modal-dialog .form-control:focus {
+    background-color: #444;
+    border-color: #888;
+    color: #fff;
+    box-shadow: none;
+}
+
+.add-block-modal-dialog .form-control::-webkit-input-placeholder { color: #999; }
+.add-block-modal-dialog .form-control::-moz-placeholder            { color: #999; }
+.add-block-modal-dialog .form-control::placeholder                 { color: #999; }
+
+/* ---- Edit toggle button ---- */
+
+.edit-toggle-btn {
+    background: #555;
+    border: 1px solid #777;
+    border-radius: 3px;
+    color: #ccc;
+    font-size: 13px;
+    padding: 6px 24px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.edit-toggle-btn:hover {
+    background: #666;
+    color: #fff;
+}
+
+.edit-toggle-btn.active {
+    background: #c8820a;
+    border-color: #e09a20;
+    color: #fff;
+}
+
+/* ---- Edit icons on tiles ---- */
+
+.block-item {
+    position: relative;
+}
+
+.block-edit-icons {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 10;
+    display: flex;
+    gap: 4px;
+}
+
+.edit-pencil-btn,
+.edit-trash-btn {
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid #888;
+    border-radius: 3px;
+    color: #eee;
+    font-size: 15px;
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.edit-pencil-btn:hover {
+    background: rgba(60, 100, 180, 0.75);
+    border-color: #aac;
+}
+
+.edit-trash-btn:hover {
+    background: rgba(160, 40, 40, 0.75);
+    border-color: #c88;
+}
+
+.block-delete-confirm {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 20;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.block-delete-confirm .btn {
+    min-width: 60px;
+}

@@ -64,37 +64,77 @@
         </div>
     </div>
 
-    <div class="row" style="margin-bottom: 20px;">
-        <div class="col-xs-12">
-            <div class="input-group">
-                <input id="newBlockName" type="text" class="form-control" placeholder="New block name" />
-                <span class="input-group-btn">
-                    <button id="addBlockBtn" class="btn btn-primary" type="button">Add block</button>
-                </span>
-            </div>
-            <div style="margin-top: 8px;">
-                <label style="font-weight: normal; cursor: pointer;">
-                    <input id="isChallengeCheck" type="checkbox" style="margin-right: 6px;" />
-                    This is a challenge
-                </label>
-                <div id="challengeOptions" style="display:none; margin-top: 6px;">
-                    <input id="targetExecutions" type="number" min="1" class="form-control"
-                           placeholder="Target executions (e.g. 30)" style="width: 240px;" />
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="block-container col-xs-12">
         <div class="block-row col-xs-12 row">
             <div th:each="bl : ${blocks}" class="col-xs-4 block-col">
-                <div class="block-item hoverable" th:classappend="${bl.color.value}">
-                    <span  th:text="${bl.name}"></span>
+                <div class="block-item hoverable" th:classappend="${bl.color.value}" th:attr="data-block-name=${bl.name}">
+                    <div class="block-edit-icons" style="display:none;">
+                        <button class="edit-pencil-btn" type="button" title="Edit">&#9998;</button>
+                        <button class="edit-trash-btn" type="button" title="Delete">&#128465;</button>
+                    </div>
+                    <div class="block-delete-confirm" style="display:none;">
+                        <span>Delete?</span>
+                        <button class="confirm-delete-yes btn btn-danger btn-sm" type="button">Yes</button>
+                        <button class="confirm-delete-no btn btn-default btn-sm" type="button">No</button>
+                    </div>
+                    <span th:text="${bl.name}"></span>
+                </div>
+            </div>
+            <div class="col-xs-4 block-col">
+                <div id="addBlockBtn" class="block-item hoverable add-block-btn">
+                    <span>+ Add block</span>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-xs-12 text-center" style="margin-top: 8px; margin-bottom: 20px;">
+            <button id="editModeBtn" class="edit-toggle-btn" type="button">Edit</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Add Block Modal -->
+<div id="addBlockModal" class="add-block-modal-overlay" style="display:none;">
+    <div class="add-block-modal-dialog">
+        <h4 style="margin-top: 0; margin-bottom: 16px;">New block</h4>
+        <input id="newBlockName" type="text" class="form-control" placeholder="Block name" style="margin-bottom: 12px;" />
+        <label style="font-weight: normal; cursor: pointer; font-size: 13px;">
+            <input id="isChallengeCheck" type="checkbox" style="margin-right: 4px;" />
+            This is a challenge
+        </label>
+        <div id="challengeOptions" style="display:none; margin-top: 8px; margin-bottom: 4px;">
+            <input id="targetExecutions" type="number" min="1" class="form-control"
+                   placeholder="Target executions (e.g. 30)" />
+        </div>
+        <div style="margin-top: 16px;">
+            <button id="submitBlockBtn" class="btn btn-primary" type="button">Add</button>
+            <button id="cancelBlockBtn" class="btn btn-default" type="button" style="margin-left: 8px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Block Modal -->
+<div id="editBlockModal" class="add-block-modal-overlay" style="display:none;">
+    <div class="add-block-modal-dialog">
+        <h4 style="margin-top: 0; margin-bottom: 16px;">Edit block</h4>
+        <input id="editBlockOriginalName" type="hidden" />
+        <input id="editBlockName" type="text" class="form-control" placeholder="Block name" style="margin-bottom: 12px;" />
+        <label style="font-weight: normal; cursor: pointer; font-size: 13px;">
+            <input id="editIsChallengeCheck" type="checkbox" style="margin-right: 4px;" />
+            This is a challenge
+        </label>
+        <div id="editChallengeOptions" style="display:none; margin-top: 8px; margin-bottom: 4px;">
+            <input id="editTargetExecutions" type="number" min="1" class="form-control"
+                   placeholder="Target executions (e.g. 30)" />
+        </div>
+        <div style="margin-top: 16px;">
+            <button id="saveEditBtn" class="btn btn-primary" type="button">Save</button>
+            <button id="cancelEditBtn" class="btn btn-default" type="button" style="margin-left: 8px;">Cancel</button>
+        </div>
+    </div>
 </div>
 
 </body>
