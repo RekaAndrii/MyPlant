@@ -1,6 +1,7 @@
 package com.my.plant.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.my.plant.util.constant.BlockColor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -23,6 +24,11 @@ public class Block {
     private BlockColor color;
     private LocalDate creationDate;
     private LocalDate lastExecution;
+    @JsonProperty("isChallenge")
+    private boolean isChallenge;
+    private Integer targetExecutions;
+    private Integer remainingExecutions;
+    private boolean completed;
 
     public Block() {
     }
@@ -76,5 +82,37 @@ public class Block {
 
     public void setColor(BlockColor color) {
         this.color = color;
+    }
+
+    public boolean isChallenge() {
+        return isChallenge;
+    }
+
+    public void setChallenge(boolean challenge) {
+        isChallenge = challenge;
+    }
+
+    public Integer getTargetExecutions() {
+        return targetExecutions;
+    }
+
+    public void setTargetExecutions(Integer targetExecutions) {
+        this.targetExecutions = targetExecutions;
+    }
+
+    public Integer getRemainingExecutions() {
+        return remainingExecutions;
+    }
+
+    public void setRemainingExecutions(Integer remainingExecutions) {
+        this.remainingExecutions = remainingExecutions;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 }

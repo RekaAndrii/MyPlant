@@ -1,12 +1,15 @@
 package com.my.plant.controller;
 
+import com.my.plant.model.Achievement;
 import com.my.plant.model.Block;
 import com.my.plant.model.HistoryAction;
 import com.my.plant.model.HistoryItem;
+import com.my.plant.service.AchievementService;
 import com.my.plant.service.BlockService;
 import com.my.plant.service.HistoryService;
 import com.my.plant.util.UserUtil;
 import com.my.plant.util.dto.AjaxResponse;
+import com.my.plant.util.dto.ExecuteBlockResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,39 +35,64 @@ public class BlockController {
     @Autowired
     private BlockService blockService;
 
+    @Autowired
+    private AchievementService achievementService;
+
     @RequestMapping(value = "/execute", method = RequestMethod.GET)
     @Operation(summary = "executeBlock", operationId = "executeBlock")
-    public @ResponseBody AjaxResponse executeBlock(@RequestParam(value = "name", required = false) String name){
+    public @ResponseBody ExecuteBlockResponse executeBlock(@RequestParam(value = "name", required = false) String name) {
         String userName = UserUtil.getLogginedUserName();
         Block block = blockService.findByName(name, userName);
-        if(block != null){
-
+        if (block != null) {
             block.setLastExecution(LocalDateTime.now().minusHours(3).toLocalDate());
+
+            boolean completed = false;
+            if (block.isChallenge() && block.getRemainingExecutions() != null) {
+                int remaining = block.getRemainingExecutions() - 1;
+                if (remaining <= 0) {
+                    remaining = 0;
+                    completed = true;
+                    block.setCompleted(true);
+                    achievementService.save(new Achievement(
+                            userName,
+                            block.getName(),
+                            block.getTargetExecutions(),
+                            LocalDateTime.now().minusHours(3).toLocalDate()
+                    ));
+                }
+                block.setRemainingExecutions(remaining);
+            }
+
             blockService.save(block);
-            historyService.save(new HistoryItem(UserUtil.getLogginedUserName(), block.getName(), HistoryAction.EXECUTED,
+            historyService.save(new HistoryItem(userName, block.getName(), HistoryAction.EXECUTED,
                     LocalDateTime.now()));
+
+            return new ExecuteBlockResponse(false, AJAX_OK_MESSAGE, block.isChallenge(),
+                    block.getRemainingExecutions(), completed);
         }
-        return new AjaxResponse(false, AJAX_OK_MESSAGE);
+        return new ExecuteBlockResponse(false, AJAX_OK_MESSAGE, false, null, false);
     }
 
     @GetMapping("/all")
-    public @ResponseBody List<Block> getAll(){
-       return blockService.getAllBlocks(UserUtil.getLogginedUserName());
+    public @ResponseBody List<Block> getAll() {
+        return blockService.getAllBlocks(UserUtil.getLogginedUserName());
     }
 
     @PostMapping(value = "/")
-    public @ResponseBody AjaxResponse create(@RequestBody  Block block){
+    public @ResponseBody AjaxResponse create(@RequestBody Block block) {
         block.setCreationDate(LocalDate.now());
         block.setUserName(UserUtil.getLogginedUserName());
+        if (block.isChallenge() && block.getTargetExecutions() != null) {
+            block.setRemainingExecutions(block.getTargetExecutions());
+        }
         blockService.save(block);
         return new AjaxResponse(false, AJAX_OK_MESSAGE);
     }
 
     @DeleteMapping(value = "/{name}")
-    public @ResponseBody AjaxResponse delete(@PathVariable(name = "name") String blockName){
+    public @ResponseBody AjaxResponse delete(@PathVariable(name = "name") String blockName) {
         blockService.remove(blockName, UserUtil.getLogginedUserName());
         return new AjaxResponse(false, AJAX_OK_MESSAGE);
     }
-
-
 }
+

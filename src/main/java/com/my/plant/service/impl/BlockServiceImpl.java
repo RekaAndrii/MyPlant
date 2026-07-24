@@ -22,7 +22,10 @@ public class BlockServiceImpl implements BlockService{
     @Override
     public List<Block> getAllBlocks(String username) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("userName").is(username));
+        query.addCriteria(new Criteria().andOperator(
+                Criteria.where("userName").is(username),
+                Criteria.where("completed").ne(true)
+        ));
         return mongoTemplate.find(query, Block.class);
     }
 

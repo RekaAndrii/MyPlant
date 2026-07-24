@@ -360,6 +360,139 @@ try {
     Write-Host "[FAIL] Block execution failed: $($_.Exception.Message)" -ForegroundColor Red
 }
 
+# ==================== CHALLENGE BLOCK PHASES ====================
+
+$CHALLENGE_BLOCK_NAME = "E2EChallengeBlock"
+$CHALLENGE_TARGET = 3
+
+# Phase 4a: Create Challenge Block
+Write-Host ""
+Write-Host "PHASE 4a: Create challenge block..." -ForegroundColor Cyan
+
+$challengeBody = @{ name = $CHALLENGE_BLOCK_NAME; isChallenge = $true; targetExecutions = $CHALLENGE_TARGET } | ConvertTo-Json
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/" -Method POST -Body $challengeBody `
+        -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "CREATE CHALLENGE" "PASS" $resp.StatusCode "{hasError:false}"
+        Write-Host "[OK] Challenge block created (target=$CHALLENGE_TARGET)" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "CREATE CHALLENGE" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Challenge block creation returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "CREATE CHALLENGE" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] Challenge block creation failed: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 4b: Execute Challenge Block 1/3
+Write-Host ""
+Write-Host "PHASE 4b: Execute challenge block (1/$CHALLENGE_TARGET)..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/execute?name=$CHALLENGE_BLOCK_NAME" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    $expectedRemaining = $CHALLENGE_TARGET - 1
+    if (-not $respData.hasError -and $respData.isChallenge -and $respData.remainingExecutions -eq $expectedRemaining -and -not $respData.completed) {
+        Add-ReportEntry "EXEC CHALLENGE 1/$CHALLENGE_TARGET" "PASS" $resp.StatusCode "remaining=$($respData.remainingExecutions)"
+        Write-Host "[OK] remaining=$($respData.remainingExecutions), completed=$($respData.completed)" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "EXEC CHALLENGE 1/$CHALLENGE_TARGET" "FAIL" $resp.StatusCode "remaining=$($respData.remainingExecutions) completed=$($respData.completed)"
+        Write-Host "[FAIL] Unexpected response: remaining=$($respData.remainingExecutions) completed=$($respData.completed)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "EXEC CHALLENGE 1/$CHALLENGE_TARGET" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 4c: Execute Challenge Block 2/3
+Write-Host ""
+Write-Host "PHASE 4c: Execute challenge block (2/$CHALLENGE_TARGET)..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/execute?name=$CHALLENGE_BLOCK_NAME" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    $expectedRemaining = $CHALLENGE_TARGET - 2
+    if (-not $respData.hasError -and $respData.isChallenge -and $respData.remainingExecutions -eq $expectedRemaining -and -not $respData.completed) {
+        Add-ReportEntry "EXEC CHALLENGE 2/$CHALLENGE_TARGET" "PASS" $resp.StatusCode "remaining=$($respData.remainingExecutions)"
+        Write-Host "[OK] remaining=$($respData.remainingExecutions), completed=$($respData.completed)" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "EXEC CHALLENGE 2/$CHALLENGE_TARGET" "FAIL" $resp.StatusCode "remaining=$($respData.remainingExecutions) completed=$($respData.completed)"
+        Write-Host "[FAIL] Unexpected response: remaining=$($respData.remainingExecutions) completed=$($respData.completed)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "EXEC CHALLENGE 2/$CHALLENGE_TARGET" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 4d: Execute Challenge Block 3/3 - should complete
+Write-Host ""
+Write-Host "PHASE 4d: Execute challenge block (3/$CHALLENGE_TARGET - completes)..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/execute?name=$CHALLENGE_BLOCK_NAME" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError -and $respData.isChallenge -and $respData.completed -and $respData.remainingExecutions -eq 0) {
+        Add-ReportEntry "EXEC CHALLENGE 3/$CHALLENGE_TARGET" "PASS" $resp.StatusCode "completed=true"
+        Write-Host "[OK] Challenge completed! remaining=0, completed=true" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "EXEC CHALLENGE 3/$CHALLENGE_TARGET" "FAIL" $resp.StatusCode "remaining=$($respData.remainingExecutions) completed=$($respData.completed)"
+        Write-Host "[FAIL] Unexpected response: remaining=$($respData.remainingExecutions) completed=$($respData.completed)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "EXEC CHALLENGE 3/$CHALLENGE_TARGET" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 4e: Verify Achievement saved
+Write-Host ""
+Write-Host "PHASE 4e: Verify achievement saved..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/achievements/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $achievements = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    $found = $achievements | Where-Object { $_.goalName -eq $CHALLENGE_BLOCK_NAME -and $_.targetExecutions -eq $CHALLENGE_TARGET }
+    if ($found) {
+        Add-ReportEntry "VERIFY ACHIEVEMENT" "PASS" $resp.StatusCode "goalName=$CHALLENGE_BLOCK_NAME"
+        Write-Host "[OK] Achievement found: goalName=$($found.goalName) target=$($found.targetExecutions)" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "VERIFY ACHIEVEMENT" "FAIL" $resp.StatusCode "Achievement not found in list"
+        Write-Host "[FAIL] Achievement not found in response" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY ACHIEVEMENT" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 4f: Verify completed block is hidden
+Write-Host ""
+Write-Host "PHASE 4f: Verify completed challenge block hidden from /block/all..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $allBlocks = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    $stillVisible = $allBlocks | Where-Object { $_.name -eq $CHALLENGE_BLOCK_NAME }
+    if (-not $stillVisible) {
+        Add-ReportEntry "VERIFY BLOCK HIDDEN" "PASS" $resp.StatusCode "$CHALLENGE_BLOCK_NAME not in list"
+        Write-Host "[OK] Completed block correctly hidden from block list" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "VERIFY BLOCK HIDDEN" "FAIL" $resp.StatusCode "$CHALLENGE_BLOCK_NAME still visible"
+        Write-Host "[FAIL] Completed block should not appear in block list" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY BLOCK HIDDEN" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# ==================== END CHALLENGE BLOCK PHASES ====================
+
 # Phase 5: Verify Block
 Write-Host ""
 Write-Host "PHASE 5: Verify block..." -ForegroundColor Cyan
@@ -394,7 +527,7 @@ try {
     if ($trendData.data -and $trendData.yValues -and $trendData.yValues.Count -gt 0) {
         $yValueCount = $trendData.yValues.Count
         Add-ReportEntry "TRENDS" "PASS" $resp.StatusCode "$yValueCount yValues, data present"
-        Write-Host "[OK] Trend data looks good ($yValueCount y-values)" -ForegroundColor Green
+        Write-Host "[OK] Trend data looks good ($yValueCount yValues)" -ForegroundColor Green
     } else {
         Add-ReportEntry "TRENDS" "FAIL" $resp.StatusCode "data or yValues missing/empty"
         Write-Host "[FAIL] Trend data missing or empty" -ForegroundColor Red
@@ -415,7 +548,7 @@ try {
     $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
     if (-not $respData.hasError) {
         Add-ReportEntry "CLEANUP" "PASS" $resp.StatusCode "{hasError:false}"
-        Write-Host "[OK] User deleted (cascade delete of blocks/history)" -ForegroundColor Green
+        Write-Host "[OK] User deleted (cascade delete of blocks and history)" -ForegroundColor Green
     } else {
         Add-ReportEntry "CLEANUP" "FAIL" $resp.StatusCode "hasError=true"
         Write-Host "[FAIL] Cleanup returned error" -ForegroundColor Red
