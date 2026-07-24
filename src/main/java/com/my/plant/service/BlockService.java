@@ -17,4 +17,6 @@ public interface BlockService {
 
     void remove(String name, String username);
 
+    void update(String oldName, Block updated, String userName);
+
 }

@@ -129,7 +129,42 @@ The JVM default timezone is forced to `Europe/Kiev` in `MyPlantApplication.@Post
 - Do not introduce new persistence patterns (e.g., reactive repositories, JPA) without an explicit request.
 - Keep changes small and targeted; avoid unsolicited refactors.
 
-## Available Skills
+## Frontend review checklist
+
+After **every** change that touches `blocks.js`, `index.html`, or `blocks.css`, verify the following before considering the task done:
+
+### jQuery selectors
+- [ ] Use `$(this).children("span")` (direct child) not `$(this).find("span")` (deep search) when the tile contains nested elements that share the same tag.
+- [ ] Any selector that targets elements by class (e.g. `.block-item`, `.block-edit-icons`) must **not** accidentally match newly added children with the same tag/class.
+
+### Click handlers and event propagation
+- [ ] Buttons nested inside a `.block-item` tile (edit icons, delete confirm) must call `e.stopPropagation()` to prevent the tile's own click handler from firing.
+- [ ] Every new block-level click handler must start with `if (editModeActive) return;` so edit mode guards execute flow.
+
+### Edit mode guard
+- [ ] Any new clickable element on the home page that should only work in normal mode must check `editModeActive`.
+- [ ] Any element that should only work in edit mode must also guard on `editModeActive`.
+
+### DOM assumptions
+- [ ] JS that reads a block name must use `data-block-name` attribute (set via `th:attr="data-block-name=${bl.name}"`), not inner text, whenever the tile contains other text nodes.
+- [ ] Any new tile-type element added to the block grid (e.g. `#addBlockBtn`) must be excluded from block-execution selectors with `.not("#theId")`.
+
+### Modal hygiene
+- [ ] Every new modal must have: a `reset` function, a Cancel button that calls reset, a backdrop-click handler (`$(e.target).is("#modalId")`), and focus set on the primary input when opened.
+- [ ] `resetXxxForm()` must clear **all** fields and sub-sections (checkboxes unchecked, conditional divs hidden, inputs emptied).
+
+### CSS positioning
+- [ ] New elements added **inside** `.block-item` (which is `position:relative`) that use `position:absolute` must set correct `z-index` so they layer above the tile content but below modals (`z-index < 1050`).
+- [ ] Flex children of `.block-item` must not break the existing `align-items:center; justify-content:center` centering of the name span.
+
+### `data-*` attributes
+- [ ] Every block tile rendered by `th:each` must carry `th:attr="data-block-name=${bl.name}"`. Verify after any restructure of the tile markup.
+
+### Thymeleaf / server-side
+- [ ] New attributes driven by server data use `th:attr` or dedicated `th:` attributes — no string concatenation in `style` or `class` attributes.
+- [ ] New template fragments follow the existing Bootstrap 4 grid (`col-xs-*`) and do not introduce inline widths that break the mobile layout.
+
+
 
 Skills live under `.github/skills/`. Read the corresponding `SKILL.md` before executing. Trigger automatically on matching user phrases.
 
@@ -140,3 +175,4 @@ Skills live under `.github/skills/`. Read the corresponding `SKILL.md` before ex
 | **myplant-verify-running** | `.github/skills/myplant-verify-running/` | verify app is running, is app up, check app status, check service health, ping app |
 | **myplant-free-8080** | `.github/skills/myplant-free-8080/` | free 8080, kill process on 8080, stop port 8080, use 8080, do not use 8181 |
 | **myplant-commit-with-push-confirmation** | `.github/skills/myplant-commit-with-push-confirmation/` | commit changes, create commit, git commit, save to git, push changes, commit and push |
+| **myplant-ui-review** | `.github/skills/myplant-ui-review/` | review ui, review frontend, check ui, ui review, frontend review, review blocks.js, review index.html |

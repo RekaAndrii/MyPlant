@@ -8,4 +8,6 @@ public interface HistoryService {
     List<HistoryItem> getUserHistory(String username);
 
     void save(HistoryItem item);
+
+    void renameBlock(String oldName, String newName, String userName);
 }

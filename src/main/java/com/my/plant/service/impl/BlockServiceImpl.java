@@ -22,7 +22,10 @@ public class BlockServiceImpl implements BlockService{
     @Override
     public List<Block> getAllBlocks(String username) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("userName").is(username));
+        query.addCriteria(new Criteria().andOperator(
+                Criteria.where("userName").is(username),
+                Criteria.where("completed").ne(true)
+        ));
         return mongoTemplate.find(query, Block.class);
     }
 
@@ -44,5 +47,44 @@ public class BlockServiceImpl implements BlockService{
         Query query = new Query();
         query.addCriteria(new Criteria().andOperator(Criteria.where("name").is(name),Criteria.where("userName").is(username)));
         mongoTemplate.remove(query, Block.class);
+    }
+
+    @Override
+    public void update(String oldName, Block updated, String userName) {
+        Block existing = findByName(oldName, userName);
+        if (existing == null) {
+            return;
+        }
+
+        existing.setName(updated.getName());
+
+        boolean wasChallenge = existing.isChallenge();
+        boolean nowChallenge = updated.isChallenge();
+
+        if (nowChallenge) {
+            Integer newTarget = updated.getTargetExecutions();
+            if (newTarget == null || newTarget < 1) {
+                newTarget = 1;
+            }
+            if (wasChallenge) {
+                Integer oldTarget = existing.getTargetExecutions();
+                Integer oldRemaining = existing.getRemainingExecutions();
+                if (oldTarget == null) oldTarget = 0;
+                if (oldRemaining == null) oldRemaining = 0;
+                int newRemaining = newTarget - (oldTarget - oldRemaining);
+                if (newRemaining < 0) newRemaining = 0;
+                existing.setRemainingExecutions(newRemaining);
+            } else {
+                existing.setRemainingExecutions(newTarget);
+            }
+            existing.setChallenge(true);
+            existing.setTargetExecutions(newTarget);
+        } else {
+            existing.setChallenge(false);
+            existing.setTargetExecutions(null);
+            existing.setRemainingExecutions(null);
+        }
+
+        mongoTemplate.save(existing);
     }
 }
