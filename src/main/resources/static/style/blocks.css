@@ -127,6 +127,55 @@
     color: #fff;
 }
 
+#dayFilterBtn {
+    margin-right: 10px;
+}
+
+/* ---- Scheduled day checkboxes (modals) ---- */
+
+.scheduled-days-label {
+    font-size: 12px;
+    color: #bbb;
+    margin-bottom: 6px;
+}
+
+.scheduled-days-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.day-checkbox {
+    font-weight: normal;
+    margin: 0;
+    cursor: pointer;
+}
+
+.day-checkbox input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.day-checkbox span {
+    display: inline-block;
+    min-width: 40px;
+    padding: 5px 6px;
+    text-align: center;
+    font-size: 12px;
+    border: 1px solid #666;
+    border-radius: 3px;
+    background: #3a3a3a;
+    color: #ccc;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.day-checkbox input:checked + span {
+    background: #648637;
+    border-color: #7aa347;
+    color: #fff;
+}
+
 /* ---- Edit icons on tiles ---- */
 
 .block-item {
@@ -187,4 +236,20 @@
 
 .block-delete-confirm .btn {
     min-width: 60px;
+}
+
+/* ---- Environment badge ---- */
+
+.env-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    background: #c8820a;
+    color: #fff;
+    border-radius: 3px;
+    vertical-align: middle;
+    line-height: 1.4;
 }

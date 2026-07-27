@@ -11,10 +11,28 @@ $(function() {
     initBlockEvent();
     initAddBlockEvent();
     initEditMode();
+    initDayFilter();
     console.log( "ready!" );
 });
 
 var editModeActive = false;
+
+var DAY_FILTER_KEY = "myplant.dayFilter";
+
+// JS Date.getDay(): Sun=0..Sat=6. Convert to ISO DayOfWeek: Mon=1..Sun=7.
+function currentIsoWeekday() {
+    var d = new Date().getDay();
+    return d === 0 ? 7 : d;
+}
+
+// Collect checked day numbers (1..7) from a container into an array.
+function collectScheduledDays(containerSelector) {
+    var days = [];
+    $(containerSelector).find("input[type=checkbox][data-day]:checked").each(function() {
+        days.push(parseInt($(this).attr("data-day"), 10));
+    });
+    return days;
+}
 
 function initBlockEvent() {
     var blocks = $(".block-item").not("#addBlockBtn");
@@ -111,6 +129,11 @@ function initAddBlockEvent() {
             payload.targetExecutions = target;
         }
 
+        var scheduledDays = collectScheduledDays("#addScheduledDays");
+        if (scheduledDays.length > 0) {
+            payload.scheduledDays = scheduledDays;
+        }
+
         $.ajax({
             url: "/block/",
             method: "POST",
@@ -132,6 +155,7 @@ function resetAddBlockForm() {
     $("#isChallengeCheck").prop("checked", false);
     $("#challengeOptions").hide();
     $("#targetExecutions").val("");
+    $("#addScheduledDays").find("input[type=checkbox]").prop("checked", false);
 }
 
 function initEditMode() {
@@ -159,6 +183,18 @@ function initEditMode() {
         $("#editIsChallengeCheck").prop("checked", false);
         $("#editChallengeOptions").hide();
         $("#editTargetExecutions").val("");
+        // Pre-check scheduled days from the tile's data attribute
+        $("#editScheduledDays").find("input[type=checkbox]").prop("checked", false);
+        var scheduledDaysRaw = tile.attr("data-scheduled-days");
+        if (scheduledDaysRaw) {
+            var configuredDays = scheduledDaysRaw.split(",");
+            $.each(configuredDays, function(i, day) {
+                day = $.trim(day);
+                if (day) {
+                    $("#editScheduledDays").find("input[data-day='" + day + "']").prop("checked", true);
+                }
+            });
+        }
         $("#editBlockModal").show();
         $("#editBlockName").focus();
     });
@@ -206,6 +242,8 @@ function initEditMode() {
             }
             payload.targetExecutions = target;
         }
+
+        payload.scheduledDays = collectScheduledDays("#editScheduledDays");
 
         $.ajax({
             url: "/block/" + encodeURIComponent(originalName),
@@ -260,4 +298,62 @@ function resetEditForm() {
     $("#editIsChallengeCheck").prop("checked", false);
     $("#editChallengeOptions").hide();
     $("#editTargetExecutions").val("");
+    $("#editScheduledDays").find("input[type=checkbox]").prop("checked", false);
+}
+
+function initDayFilter() {
+    // Restore persisted state (default: off)
+    var active = localStorage.getItem(DAY_FILTER_KEY) === "on";
+    setDayFilterState(active);
+
+    $("#dayFilterBtn").click(function() {
+        var nowActive = !($(this).hasClass("active"));
+        localStorage.setItem(DAY_FILTER_KEY, nowActive ? "on" : "off");
+        setDayFilterState(nowActive);
+    });
+}
+
+function setDayFilterState(active) {
+    var btn = $("#dayFilterBtn");
+    if (active) {
+        btn.addClass("active").text("Today only: On");
+    } else {
+        btn.removeClass("active").text("Today only: Off");
+    }
+    applyDayFilter(active);
+}
+
+function applyDayFilter(active) {
+    var today = currentIsoWeekday();
+    $(".block-item").not("#addBlockBtn").each(function() {
+        var tile = $(this);
+        var col = tile.closest(".block-col");
+
+        if (!active) {
+            col.show();
+            return;
+        }
+
+        var raw = tile.attr("data-scheduled-days");
+        // No days configured => always active (show every day)
+        if (!raw || $.trim(raw) === "") {
+            col.show();
+            return;
+        }
+
+        var days = raw.split(",");
+        var scheduledToday = false;
+        $.each(days, function(i, day) {
+            if (parseInt($.trim(day), 10) === today) {
+                scheduledToday = true;
+                return false; // break
+            }
+        });
+
+        if (scheduledToday) {
+            col.show();
+        } else {
+            col.hide();
+        }
+    });
 }

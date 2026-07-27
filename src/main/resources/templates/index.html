@@ -42,7 +42,7 @@
 <nav class="navbar navbar-inverse">
     <div class="container">
         <div class="navbar-header">
-            <a class="navbar-brand" href="/home">My Brick Plant</a>
+            <a class="navbar-brand" href="/home">My Brick Plant<span th:if="${appEnv == 'dev'}" class="env-badge">DEV</span></a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
@@ -67,7 +67,7 @@
     <div class="block-container col-xs-12">
         <div class="block-row col-xs-12 row">
             <div th:each="bl : ${blocks}" class="col-xs-4 block-col">
-                <div class="block-item hoverable" th:classappend="${bl.color.value}" th:attr="data-block-name=${bl.name}">
+                <div class="block-item hoverable" th:classappend="${bl.color.value}" th:attr="data-block-name=${bl.name},data-scheduled-days=${bl.scheduledDays != null} ? ${#strings.listJoin(bl.scheduledDays, ',')} : ''">
                     <div class="block-edit-icons" style="display:none;">
                         <button class="edit-pencil-btn" type="button" title="Edit">&#9998;</button>
                         <button class="edit-trash-btn" type="button" title="Delete">&#128465;</button>
@@ -90,6 +90,7 @@
 
     <div class="row">
         <div class="col-xs-12 text-center" style="margin-top: 8px; margin-bottom: 20px;">
+            <button id="dayFilterBtn" class="edit-toggle-btn" type="button">Today only: Off</button>
             <button id="editModeBtn" class="edit-toggle-btn" type="button">Edit</button>
         </div>
     </div>
@@ -108,6 +109,18 @@
         <div id="challengeOptions" style="display:none; margin-top: 8px; margin-bottom: 4px;">
             <input id="targetExecutions" type="number" min="1" class="form-control"
                    placeholder="Target executions (e.g. 30)" />
+        </div>
+        <div class="scheduled-days" style="margin-top: 12px;">
+            <div class="scheduled-days-label">Scheduled days (leave empty for every day)</div>
+            <div id="addScheduledDays" class="scheduled-days-row">
+                <label class="day-checkbox"><input type="checkbox" data-day="1" /><span>Mon</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="2" /><span>Tue</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="3" /><span>Wed</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="4" /><span>Thu</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="5" /><span>Fri</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="6" /><span>Sat</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="7" /><span>Sun</span></label>
+            </div>
         </div>
         <div style="margin-top: 16px;">
             <button id="submitBlockBtn" class="btn btn-primary" type="button">Add</button>
@@ -129,6 +142,18 @@
         <div id="editChallengeOptions" style="display:none; margin-top: 8px; margin-bottom: 4px;">
             <input id="editTargetExecutions" type="number" min="1" class="form-control"
                    placeholder="Target executions (e.g. 30)" />
+        </div>
+        <div class="scheduled-days" style="margin-top: 12px;">
+            <div class="scheduled-days-label">Scheduled days (leave empty for every day)</div>
+            <div id="editScheduledDays" class="scheduled-days-row">
+                <label class="day-checkbox"><input type="checkbox" data-day="1" /><span>Mon</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="2" /><span>Tue</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="3" /><span>Wed</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="4" /><span>Thu</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="5" /><span>Fri</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="6" /><span>Sat</span></label>
+                <label class="day-checkbox"><input type="checkbox" data-day="7" /><span>Sun</span></label>
+            </div>
         </div>
         <div style="margin-top: 16px;">
             <button id="saveEditBtn" class="btn btn-primary" type="button">Save</button>

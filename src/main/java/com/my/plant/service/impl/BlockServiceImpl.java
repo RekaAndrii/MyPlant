@@ -57,6 +57,7 @@ public class BlockServiceImpl implements BlockService{
         }
 
         existing.setName(updated.getName());
+        existing.setScheduledDays(updated.getScheduledDays());
 
         boolean wasChallenge = existing.isChallenge();
         boolean nowChallenge = updated.isChallenge();
