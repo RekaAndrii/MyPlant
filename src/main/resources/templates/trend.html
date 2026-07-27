@@ -34,7 +34,7 @@
 <nav class="navbar navbar-inverse">
     <div class="container">
         <div class="navbar-header">
-            <a class="navbar-brand" href="/home">My Brick Plant</a>
+            <a class="navbar-brand" href="/home">My Brick Plant<span th:if="${appEnv == 'dev'}" class="env-badge">DEV</span></a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">

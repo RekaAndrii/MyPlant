@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Created by User on 03.06.2017.
@@ -29,6 +30,7 @@ public class Block {
     private Integer targetExecutions;
     private Integer remainingExecutions;
     private boolean completed;
+    private List<Integer> scheduledDays;
 
     public Block() {
     }
@@ -114,5 +116,13 @@ public class Block {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public List<Integer> getScheduledDays() {
+        return scheduledDays;
+    }
+
+    public void setScheduledDays(List<Integer> scheduledDays) {
+        this.scheduledDays = scheduledDays;
     }
 }

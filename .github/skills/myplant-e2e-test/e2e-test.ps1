@@ -562,6 +562,116 @@ try {
     Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
 }
 
+# ==================== SCHEDULED DAYS PHASES ====================
+
+$SCHEDULED_BLOCK_NAME = "E2EScheduledBlock"
+
+# Phase 5s1: Create block with scheduled days (Mon, Wed)
+Write-Host ""
+Write-Host "PHASE 5s1: Create block with scheduled days (Mon, Wed)..." -ForegroundColor Cyan
+
+try {
+    $scheduledBody = @{ name = $SCHEDULED_BLOCK_NAME; scheduledDays = @(1, 3) } | ConvertTo-Json
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/" -Method POST -Body $scheduledBody `
+        -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "CREATE SCHEDULED" "PASS" $resp.StatusCode "{hasError:false}"
+        Write-Host "[OK] Scheduled block created (days=1,3)" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "CREATE SCHEDULED" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Scheduled block creation returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "CREATE SCHEDULED" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] Scheduled block creation failed: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 5s2: Verify scheduled days persisted
+Write-Host ""
+Write-Host "PHASE 5s2: Verify scheduled days persisted..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $allBlocks = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    $scheduled = $allBlocks | Where-Object { $_.name -eq $SCHEDULED_BLOCK_NAME }
+    $daysOk = $scheduled -and ($scheduled.scheduledDays -contains 1) -and ($scheduled.scheduledDays -contains 3) -and ($scheduled.scheduledDays.Count -eq 2)
+    if ($daysOk) {
+        Add-ReportEntry "VERIFY SCHEDULED" "PASS" $resp.StatusCode "scheduledDays=[1,3]"
+        Write-Host "[OK] Scheduled days persisted: 1,3" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "VERIFY SCHEDULED" "FAIL" $resp.StatusCode "scheduledDays=$($scheduled.scheduledDays -join ',')"
+        Write-Host "[FAIL] Scheduled days mismatch" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY SCHEDULED" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 5s3: Edit scheduled days (Mon, Wed, Fri)
+Write-Host ""
+Write-Host "PHASE 5s3: Edit scheduled days (Mon, Wed, Fri)..." -ForegroundColor Cyan
+
+try {
+    $editDaysBody = @{ name = $SCHEDULED_BLOCK_NAME; scheduledDays = @(1, 3, 5) } | ConvertTo-Json
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/$SCHEDULED_BLOCK_NAME" -Method PUT -Body $editDaysBody `
+        -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "EDIT SCHEDULED" "PASS" $resp.StatusCode "{hasError:false}"
+        Write-Host "[OK] Scheduled days updated to 1,3,5" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "EDIT SCHEDULED" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Scheduled days edit returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "EDIT SCHEDULED" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] Scheduled days edit failed: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 5s4: Verify updated scheduled days
+Write-Host ""
+Write-Host "PHASE 5s4: Verify updated scheduled days..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $allBlocks = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    $scheduled = $allBlocks | Where-Object { $_.name -eq $SCHEDULED_BLOCK_NAME }
+    $daysOk = $scheduled -and ($scheduled.scheduledDays -contains 5) -and ($scheduled.scheduledDays.Count -eq 3)
+    if ($daysOk) {
+        Add-ReportEntry "VERIFY SCHEDULED EDIT" "PASS" $resp.StatusCode "scheduledDays=[1,3,5]"
+        Write-Host "[OK] Updated scheduled days verified: 1,3,5" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "VERIFY SCHEDULED EDIT" "FAIL" $resp.StatusCode "scheduledDays=$($scheduled.scheduledDays -join ',')"
+        Write-Host "[FAIL] Updated scheduled days mismatch" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY SCHEDULED EDIT" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 5s5: Cleanup scheduled block
+Write-Host ""
+Write-Host "PHASE 5s5: Delete scheduled block..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/block/$SCHEDULED_BLOCK_NAME" -Method DELETE `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "DELETE SCHEDULED" "PASS" $resp.StatusCode "{hasError:false}"
+        Write-Host "[OK] Scheduled block deleted" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "DELETE SCHEDULED" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Scheduled block delete returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "DELETE SCHEDULED" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] Scheduled block delete failed: $($_.Exception.Message)" -ForegroundColor Red
+}
+
 # Phase 5c: Delete block
 Write-Host ""
 Write-Host "PHASE 5c: Delete block ($BLOCK_RENAMED)..." -ForegroundColor Cyan

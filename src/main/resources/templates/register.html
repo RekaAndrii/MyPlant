@@ -14,7 +14,7 @@
     <nav class="navbar navbar-inverse login-nav">
         <div class="container">
             <div class="navbar-header">
-                <a class="navbar-brand" href="/home">My Brick Plant</a>
+                <a class="navbar-brand" href="/home">My Brick Plant<span th:if="${appEnv == 'dev'}" class="env-badge">DEV</span></a>
             </div>
         </div>
     </nav>
