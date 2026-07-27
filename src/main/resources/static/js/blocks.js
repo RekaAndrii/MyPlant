@@ -12,10 +12,18 @@ $(function() {
     initAddBlockEvent();
     initEditMode();
     initDayFilter();
+    initNavbarToggle();
     console.log( "ready!" );
 });
 
 var editModeActive = false;
+
+// Toggle the collapsed navbar menu on mobile (Bootstrap 3 JS is not loaded).
+function initNavbarToggle() {
+    $(document).on("click", "#navbarToggle", function () {
+        $("#navbar").toggleClass("in");
+    });
+}
 
 var DAY_FILTER_KEY = "myplant.dayFilter";
 

@@ -253,3 +253,33 @@
     vertical-align: middle;
     line-height: 1.4;
 }
+
+/* ---- Mobile: keep 3 blocks per row but tighten side spacing ---- */
+
+@media (max-width: 767px) {
+    /* Shrink the outer container padding so tiles use more width */
+    .block-container {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    /* Tighter gutters between the 3 columns */
+    .block-row {
+        margin-left: -4px;
+        margin-right: -4px;
+    }
+
+    .block-col {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    /* Slightly smaller tiles/text so 3 fit comfortably on a phone */
+    .block-item {
+        min-height: 100px;
+    }
+
+    .block-item span {
+        font-size: large;
+    }
+}
