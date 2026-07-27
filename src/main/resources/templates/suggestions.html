@@ -1,12 +1,14 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>My Plant - Trophy</title>
+    <title>My Plant - Suggestions</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" th:href="@{/style/bootstrap.css}" href="../../style/bootstrap.css" />
     <link rel="stylesheet" th:href="@{/style/blocks.css}" href="../../style/blocks.css" />
     <link rel="manifest" th:href="@{/manifest.json}" />
+    <script th:src="@{/js/jquery-3.2.1.min.js}" src="../../js/jquery-3.2.1.min.js"></script>
+    <script th:src="@{/js/blocks.js}" src="../../js/blocks.js"></script>
 </head>
 <body>
 
@@ -25,8 +27,8 @@
             <ul class="nav navbar-nav">
                 <li><a href="/home">Home</a></li>
                 <li><a href="/trend">Trends</a></li>
-                <li class="active"><a href="/achievements">Trophy</a></li>
-                <li><a href="/suggestions">Suggestions</a></li>
+                <li><a href="/achievements">Trophy</a></li>
+                <li class="active"><a href="/suggestions">Suggestions</a></li>
             </ul>
             <form th:action="@{/logout}" method="post" class="navbar-form navbar-right">
                 <button type="submit" class="btn btn-default">Logout</button>
@@ -36,6 +38,7 @@
 </nav>
 
 <div class="container" style="margin-top: 30px;">
+
     <div class="row" th:if="${errorMessage}">
         <div class="col-xs-12">
             <div class="alert alert-warning" th:text="${errorMessage}"></div>
@@ -44,36 +47,44 @@
 
     <div class="row">
         <div class="col-xs-12">
-            <h3>Achievements</h3>
+            <h3>App Suggestions</h3>
         </div>
     </div>
 
-    <div class="row" th:if="${achievements == null or #lists.isEmpty(achievements)}">
+    <div class="row" style="margin-bottom: 24px;">
         <div class="col-xs-12">
-            <p class="text-muted">No achievements yet. Complete a challenge to see it here.</p>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <form th:action="@{/suggestions}" method="post">
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <textarea id="suggestionText" name="text" class="form-control"
+                                      rows="3" placeholder="Describe your suggestion..."
+                                      style="resize: vertical;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Suggestion</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="row" th:if="${achievements != null and not #lists.isEmpty(achievements)}">
+    <div class="row" th:if="${suggestions == null or #lists.isEmpty(suggestions)}">
         <div class="col-xs-12">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Goal</th>
-                        <th>Target Executions</th>
-                        <th>Date Achieved</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="a : ${achievements}">
-                        <td th:text="${a.goalName}"></td>
-                        <td th:text="${a.targetExecutions}"></td>
-                        <td th:text="${a.achievedDate}"></td>
-                    </tr>
-                </tbody>
-            </table>
+            <p class="text-muted">No suggestions yet. Be the first to suggest an improvement!</p>
         </div>
     </div>
+
+    <div class="row" th:if="${suggestions != null and not #lists.isEmpty(suggestions)}">
+        <div class="col-xs-12">
+            <div th:each="s : ${suggestions}" class="panel panel-default" style="margin-bottom: 10px;">
+                <div class="panel-body">
+                    <p style="margin-bottom: 6px; white-space: pre-wrap;" th:text="${s.text}"></p>
+                    <small class="text-muted" th:text="${#temporals.format(s.createdDate, 'dd MMM yyyy, HH:mm')}"></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 </body>

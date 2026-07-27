@@ -50,6 +50,7 @@ function initBlockEvent() {
         var span = $(this).children("span");
         var blockName = span.text();
         var block = $(this);
+        var wasGreen = block.hasClass("green");
 
         block.removeClass("red").removeClass("yellow").removeClass("green");
 
@@ -58,6 +59,10 @@ function initBlockEvent() {
             data: {"name": blockName},
             success: function(result) {
                 if (result.hasError == false) {
+                    if (!wasGreen) {
+                        var current = parseInt($("#todayScore").text(), 10) || 0;
+                        $("#todayScore").text(current + 1);
+                    }
                     if (result.isChallenge) {
                         if (result.completed) {
                             // Challenge complete: flash "Done" then remove block

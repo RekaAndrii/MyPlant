@@ -5,6 +5,7 @@ import com.my.plant.service.BlockService;
 import com.my.plant.util.ColorUtil;
 import com.my.plant.util.UserUtil;
 import com.my.plant.util.comparator.BlockComparator;
+import com.my.plant.util.constant.BlockColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +39,14 @@ public class HomeController {
             blocks = blockService.getAllBlocks(UserUtil.getLogginedUserName());
             ColorUtil.setColorToList(blocks);
             Collections.sort(blocks, blockComparator);
+            long todayScore = blocks.stream()
+                    .filter(b -> BlockColor.GREEN.equals(b.getColor()))
+                    .count();
+            model.addObject("todayScore", todayScore);
         } catch (Exception ex) {
             LOGGER.error("Failed to load blocks for home page", ex);
             model.addObject("errorMessage", "Unable to load blocks right now. Please verify MongoDB connectivity and try again.");
+            model.addObject("todayScore", 0L);
         }
 
         model.addObject("blocks", blocks);

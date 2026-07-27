@@ -715,27 +715,207 @@ try {
 
 # ==================== END EDIT / DELETE BLOCK PHASES ====================
 
-# Phase 6: Check Trends
-Write-Host ""
-Write-Host "PHASE 6: Check trends..." -ForegroundColor Cyan
+# ==================== TREND PHASES ====================
 
-$trendUri = "$BaseUrl/trend/countPerDay"
+# Phase 6a: countPerDay - weekday aggregation
+Write-Host ""
+Write-Host "PHASE 6a: Trends - executions per weekday..." -ForegroundColor Cyan
+
 try {
-    $resp = Invoke-WebRequest -Uri $trendUri -Method GET `
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/trend/countPerDay?time=month" -Method GET `
         -WebSession $webSession -UseBasicParsing -ErrorAction Stop
     $trendData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
     if ($trendData.data -and $trendData.yValues -and $trendData.yValues.Count -gt 0) {
         $yValueCount = $trendData.yValues.Count
-        Add-ReportEntry "TRENDS" "PASS" $resp.StatusCode "$yValueCount yValues, data present"
-        Write-Host "[OK] Trend data looks good ($yValueCount yValues)" -ForegroundColor Green
+        Add-ReportEntry "TREND WEEKDAY" "PASS" $resp.StatusCode "$yValueCount yValues, data present"
+        Write-Host "[OK] Weekday trend data present ($yValueCount yValues)" -ForegroundColor Green
     } else {
-        Add-ReportEntry "TRENDS" "FAIL" $resp.StatusCode "data or yValues missing/empty"
-        Write-Host "[FAIL] Trend data missing or empty" -ForegroundColor Red
+        Add-ReportEntry "TREND WEEKDAY" "FAIL" $resp.StatusCode "data or yValues missing/empty"
+        Write-Host "[FAIL] Weekday trend data missing or empty" -ForegroundColor Red
     }
 } catch {
-    Add-ReportEntry "TRENDS" "FAIL" "ERR" $_.Exception.Message
-    Write-Host "[FAIL] Trend retrieval failed: $($_.Exception.Message)" -ForegroundColor Red
+    Add-ReportEntry "TREND WEEKDAY" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
 }
+
+# Phase 6b: countPerDate - 30-day daily line data
+Write-Host ""
+Write-Host "PHASE 6b: Trends - daily activity last 30 days..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/trend/countPerDate" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $dateData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    # Must return an array of 30 entries (one per day) each with 'date' and 'count'
+    $hasShape = $dateData -is [array] -and $dateData.Count -ge 30
+    $hasFields = $hasShape -and $dateData[0].date -and ($dateData[0].count -ne $null)
+    # At least one day must have count > 0 because we executed a block earlier in the test
+    $hasActivity = ($dateData | Where-Object { $_.count -gt 0 }).Count -gt 0
+    if ($hasShape -and $hasFields -and $hasActivity) {
+        $activeDays = ($dateData | Where-Object { $_.count -gt 0 }).Count
+        Add-ReportEntry "TREND DAILY LINE" "PASS" $resp.StatusCode "$($dateData.Count) days, $activeDays active"
+        Write-Host "[OK] Daily line data: $($dateData.Count) days, $activeDays with activity" -ForegroundColor Green
+    } elseif ($hasShape -and $hasFields -and -not $hasActivity) {
+        Add-ReportEntry "TREND DAILY LINE" "FAIL" $resp.StatusCode "all counts are 0 - block exec not reflected"
+        Write-Host "[FAIL] Daily data returned but all counts are 0 (expected activity from earlier phases)" -ForegroundColor Red
+    } else {
+        Add-ReportEntry "TREND DAILY LINE" "FAIL" $resp.StatusCode "unexpected shape (count=$($dateData.Count))"
+        Write-Host "[FAIL] Daily line data has unexpected shape" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "TREND DAILY LINE" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 6c: Trends page renders
+Write-Host ""
+Write-Host "PHASE 6c: Trends page renders..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/trend" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $pageContent = ConvertResponseToString $resp.Content
+    if ($resp.StatusCode -eq 200 -and $pageContent -match "weekday-bar-chart" -and $pageContent -match "daily-line-chart") {
+        Add-ReportEntry "TREND PAGE" "PASS" $resp.StatusCode "page rendered with charts"
+        Write-Host "[OK] Trend page rendered with all chart containers" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "TREND PAGE" "FAIL" $resp.StatusCode "chart containers missing from page"
+        Write-Host "[FAIL] Trend page did not contain expected chart elements" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "TREND PAGE" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# ==================== END TREND PHASES ====================
+
+# ==================== SUGGESTION PHASES ====================
+
+$SUGGESTION_TEXT_1 = "E2E suggestion one - improve performance"
+$SUGGESTION_TEXT_2 = "E2E suggestion two - add dark mode"
+
+# Phase S1: Load suggestions page
+Write-Host ""
+Write-Host "PHASE S1: Load suggestions page..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/suggestions" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    if ($resp.StatusCode -eq 200 -and (ConvertResponseToString $resp.Content) -match "App Suggestions") {
+        Add-ReportEntry "SUGGESTIONS PAGE" "PASS" $resp.StatusCode "page rendered"
+        Write-Host "[OK] Suggestions page loaded successfully" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "SUGGESTIONS PAGE" "FAIL" $resp.StatusCode "unexpected response"
+        Write-Host "[FAIL] Suggestions page did not render expected content (HTTP $($resp.StatusCode))" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "SUGGESTIONS PAGE" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase S2: Add first suggestion
+Write-Host ""
+Write-Host "PHASE S2: Add first suggestion..." -ForegroundColor Cyan
+
+try {
+    $suggBody = "text=$([Uri]::EscapeDataString($SUGGESTION_TEXT_1))"
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/suggestions" -Method POST `
+        -Body $suggBody -ContentType "application/x-www-form-urlencoded" `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    # POST redirects to GET /suggestions (302 -> 200)
+    if ($resp.StatusCode -eq 200) {
+        Add-ReportEntry "ADD SUGGESTION 1" "PASS" $resp.StatusCode "redirected to page"
+        Write-Host "[OK] First suggestion submitted" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "ADD SUGGESTION 1" "FAIL" $resp.StatusCode "unexpected status"
+        Write-Host "[FAIL] Unexpected HTTP $($resp.StatusCode)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "ADD SUGGESTION 1" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase S3: Add second suggestion
+Write-Host ""
+Write-Host "PHASE S3: Add second suggestion..." -ForegroundColor Cyan
+
+try {
+    $suggBody = "text=$([Uri]::EscapeDataString($SUGGESTION_TEXT_2))"
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/suggestions" -Method POST `
+        -Body $suggBody -ContentType "application/x-www-form-urlencoded" `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    if ($resp.StatusCode -eq 200) {
+        Add-ReportEntry "ADD SUGGESTION 2" "PASS" $resp.StatusCode "redirected to page"
+        Write-Host "[OK] Second suggestion submitted" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "ADD SUGGESTION 2" "FAIL" $resp.StatusCode "unexpected status"
+        Write-Host "[FAIL] Unexpected HTTP $($resp.StatusCode)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "ADD SUGGESTION 2" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase S4: Verify both suggestions saved and newest is first
+Write-Host ""
+Write-Host "PHASE S4: Verify suggestions saved and sorted newest-first..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/suggestions/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $allSuggestions = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    $found1 = $allSuggestions | Where-Object { $_.text -eq $SUGGESTION_TEXT_1 }
+    $found2 = $allSuggestions | Where-Object { $_.text -eq $SUGGESTION_TEXT_2 }
+    # Newest-first: suggestion 2 (added last) should appear before suggestion 1
+    $idx1 = [array]::IndexOf($allSuggestions, ($allSuggestions | Where-Object { $_.text -eq $SUGGESTION_TEXT_1 } | Select-Object -First 1))
+    $idx2 = [array]::IndexOf($allSuggestions, ($allSuggestions | Where-Object { $_.text -eq $SUGGESTION_TEXT_2 } | Select-Object -First 1))
+    if ($found1 -and $found2 -and $idx2 -lt $idx1) {
+        Add-ReportEntry "VERIFY SUGGESTIONS" "PASS" $resp.StatusCode "2 suggestions, newest first"
+        Write-Host "[OK] Both suggestions saved; newest (suggestion 2) is first in list" -ForegroundColor Green
+    } elseif ($found1 -and $found2) {
+        Add-ReportEntry "VERIFY SUGGESTIONS" "FAIL" $resp.StatusCode "found but order wrong (idx1=$idx1 idx2=$idx2)"
+        Write-Host "[FAIL] Suggestions found but not sorted newest-first (idx2=$idx2 should be < idx1=$idx1)" -ForegroundColor Red
+    } else {
+        Add-ReportEntry "VERIFY SUGGESTIONS" "FAIL" $resp.StatusCode "one or both suggestions missing"
+        Write-Host "[FAIL] Expected 2 suggestions, found: $($allSuggestions.Count)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY SUGGESTIONS" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase S5: Verify blank suggestion is rejected (not saved)
+Write-Host ""
+Write-Host "PHASE S5: Verify blank suggestion is not saved..." -ForegroundColor Cyan
+
+try {
+    $countBefore = 0
+    $respBefore = Invoke-WebRequest -Uri "$BaseUrl/suggestions/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $countBefore = (ConvertFrom-Json (ConvertResponseToString $respBefore.Content)).Count
+
+    $suggBody = "text=   "
+    Invoke-WebRequest -Uri "$BaseUrl/suggestions" -Method POST `
+        -Body $suggBody -ContentType "application/x-www-form-urlencoded" `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop | Out-Null
+
+    $respAfter = Invoke-WebRequest -Uri "$BaseUrl/suggestions/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $countAfter = (ConvertFrom-Json (ConvertResponseToString $respAfter.Content)).Count
+
+    if ($countAfter -eq $countBefore) {
+        Add-ReportEntry "BLANK SUGGESTION" "PASS" "200" "count unchanged ($countAfter)"
+        Write-Host "[OK] Blank suggestion correctly ignored (count=$countAfter)" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "BLANK SUGGESTION" "FAIL" "200" "count changed $countBefore -> $countAfter"
+        Write-Host "[FAIL] Blank suggestion was saved (count went from $countBefore to $countAfter)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "BLANK SUGGESTION" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# ==================== END SUGGESTION PHASES ====================
 
 # Phase 7: Cleanup - Delete User
 Write-Host ""

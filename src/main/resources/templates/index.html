@@ -55,6 +55,7 @@
                 <li class="active"><a href="/home">Home</a></li>
                 <li><a href="/trend">Trends</a></li>
                 <li><a href="/achievements">Trophy</a></li>
+                <li><a href="/suggestions">Suggestions</a></li>
             </ul>
             <form th:action="@{/logout}" method="post" class="navbar-form navbar-right">
                 <button type="submit" class="btn btn-default">Logout</button>
@@ -63,7 +64,7 @@
     </div>
 </nav>
 
-<div class="container">
+<div class="container" style="padding-top: 0; margin-top: 0;">
     <div class="row" th:if="${errorMessage}">
         <div class="col-xs-12">
             <div class="alert alert-warning" th:text="${errorMessage}"></div>
@@ -71,6 +72,9 @@
     </div>
 
     <div class="block-container col-xs-12">
+        <div class="score-bar">
+            <span class="score-label">Today's score: </span><span class="score-value" id="todayScore" th:text="${todayScore}">0</span>
+        </div>
         <div class="block-row col-xs-12 row">
             <div th:each="bl : ${blocks}" class="col-xs-4 block-col">
                 <div class="block-item hoverable" th:classappend="${bl.color.value}" th:attr="data-block-name=${bl.name},data-scheduled-days=${bl.scheduledDays != null} ? ${#strings.listJoin(bl.scheduledDays, ',')} : ''">
