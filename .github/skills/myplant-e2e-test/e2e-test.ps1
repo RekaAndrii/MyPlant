@@ -715,27 +715,79 @@ try {
 
 # ==================== END EDIT / DELETE BLOCK PHASES ====================
 
-# Phase 6: Check Trends
-Write-Host ""
-Write-Host "PHASE 6: Check trends..." -ForegroundColor Cyan
+# ==================== TREND PHASES ====================
 
-$trendUri = "$BaseUrl/trend/countPerDay"
+# Phase 6a: countPerDay - weekday aggregation
+Write-Host ""
+Write-Host "PHASE 6a: Trends - executions per weekday..." -ForegroundColor Cyan
+
 try {
-    $resp = Invoke-WebRequest -Uri $trendUri -Method GET `
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/trend/countPerDay?time=month" -Method GET `
         -WebSession $webSession -UseBasicParsing -ErrorAction Stop
     $trendData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
     if ($trendData.data -and $trendData.yValues -and $trendData.yValues.Count -gt 0) {
         $yValueCount = $trendData.yValues.Count
-        Add-ReportEntry "TRENDS" "PASS" $resp.StatusCode "$yValueCount yValues, data present"
-        Write-Host "[OK] Trend data looks good ($yValueCount yValues)" -ForegroundColor Green
+        Add-ReportEntry "TREND WEEKDAY" "PASS" $resp.StatusCode "$yValueCount yValues, data present"
+        Write-Host "[OK] Weekday trend data present ($yValueCount yValues)" -ForegroundColor Green
     } else {
-        Add-ReportEntry "TRENDS" "FAIL" $resp.StatusCode "data or yValues missing/empty"
-        Write-Host "[FAIL] Trend data missing or empty" -ForegroundColor Red
+        Add-ReportEntry "TREND WEEKDAY" "FAIL" $resp.StatusCode "data or yValues missing/empty"
+        Write-Host "[FAIL] Weekday trend data missing or empty" -ForegroundColor Red
     }
 } catch {
-    Add-ReportEntry "TRENDS" "FAIL" "ERR" $_.Exception.Message
-    Write-Host "[FAIL] Trend retrieval failed: $($_.Exception.Message)" -ForegroundColor Red
+    Add-ReportEntry "TREND WEEKDAY" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
 }
+
+# Phase 6b: countPerDate - 30-day daily line data
+Write-Host ""
+Write-Host "PHASE 6b: Trends - daily activity last 30 days..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/trend/countPerDate" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $dateData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    # Must return an array of 30 entries (one per day) each with 'date' and 'count'
+    $hasShape = $dateData -is [array] -and $dateData.Count -ge 30
+    $hasFields = $hasShape -and $dateData[0].date -and ($dateData[0].count -ne $null)
+    # At least one day must have count > 0 because we executed a block earlier in the test
+    $hasActivity = ($dateData | Where-Object { $_.count -gt 0 }).Count -gt 0
+    if ($hasShape -and $hasFields -and $hasActivity) {
+        $activeDays = ($dateData | Where-Object { $_.count -gt 0 }).Count
+        Add-ReportEntry "TREND DAILY LINE" "PASS" $resp.StatusCode "$($dateData.Count) days, $activeDays active"
+        Write-Host "[OK] Daily line data: $($dateData.Count) days, $activeDays with activity" -ForegroundColor Green
+    } elseif ($hasShape -and $hasFields -and -not $hasActivity) {
+        Add-ReportEntry "TREND DAILY LINE" "FAIL" $resp.StatusCode "all counts are 0 - block exec not reflected"
+        Write-Host "[FAIL] Daily data returned but all counts are 0 (expected activity from earlier phases)" -ForegroundColor Red
+    } else {
+        Add-ReportEntry "TREND DAILY LINE" "FAIL" $resp.StatusCode "unexpected shape (count=$($dateData.Count))"
+        Write-Host "[FAIL] Daily line data has unexpected shape" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "TREND DAILY LINE" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase 6c: Trends page renders
+Write-Host ""
+Write-Host "PHASE 6c: Trends page renders..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/trend" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $pageContent = ConvertResponseToString $resp.Content
+    if ($resp.StatusCode -eq 200 -and $pageContent -match "weekday-bar-chart" -and $pageContent -match "daily-line-chart") {
+        Add-ReportEntry "TREND PAGE" "PASS" $resp.StatusCode "page rendered with charts"
+        Write-Host "[OK] Trend page rendered with all chart containers" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "TREND PAGE" "FAIL" $resp.StatusCode "chart containers missing from page"
+        Write-Host "[FAIL] Trend page did not contain expected chart elements" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "TREND PAGE" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# ==================== END TREND PHASES ====================
 
 # ==================== SUGGESTION PHASES ====================
 

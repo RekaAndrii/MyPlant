@@ -14,6 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,5 +41,10 @@ public class TrendController {
              trend = trendService.getBlockTrendPerDay(null);
         }
         return trend;
+    }
+
+    @GetMapping(path = "/trend/countPerDate")
+    public @ResponseBody List<Map<String, Object>> getCountPerDate() {
+        return trendService.getCountPerDate(LocalDate.now().minusDays(29));
     }
 }

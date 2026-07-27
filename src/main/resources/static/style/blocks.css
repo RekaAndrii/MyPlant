@@ -287,3 +287,27 @@
         font-size: large;
     }
 }
+
+/* ── Today's score bar ──────────────────────────────────────────────────── */
+.navbar {
+    margin-bottom: 0;
+}
+
+.score-bar {
+    margin-top: 8px;
+    margin-bottom: 6px;
+    padding: 0 0 0 15px;
+}
+
+.score-value {
+    font-size: 1em;
+    font-weight: bold;
+    color: #648637;
+    vertical-align: middle;
+}
+
+.score-label {
+    color: #888;
+    font-size: 1em;
+    vertical-align: middle;
+}

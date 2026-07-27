@@ -176,3 +176,4 @@ Skills live under `.github/skills/`. Read the corresponding `SKILL.md` before ex
 | **myplant-free-8080** | `.github/skills/myplant-free-8080/` | free 8080, kill process on 8080, stop port 8080, use 8080, do not use 8181 |
 | **myplant-commit-with-push-confirmation** | `.github/skills/myplant-commit-with-push-confirmation/` | commit changes, create commit, git commit, save to git, push changes, commit and push |
 | **myplant-ui-review** | `.github/skills/myplant-ui-review/` | review ui, review frontend, check ui, ui review, frontend review, review blocks.js, review index.html |
+| **myplant-release** | `.github/skills/myplant-release/` | release, ship it, release to master, merge to master, promote develop, publish release, do a release, release changes |

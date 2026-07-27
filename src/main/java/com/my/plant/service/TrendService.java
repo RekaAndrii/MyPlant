@@ -4,6 +4,7 @@ import com.my.plant.util.dto.TrendDto;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,4 +13,6 @@ import java.util.Map;
 public interface TrendService {
 
     TrendDto<Map<DayOfWeek, Map<String, Integer>>> getBlockTrendPerDay(LocalDate since);
+
+    List<Map<String, Object>> getCountPerDate(LocalDate since);
 }
