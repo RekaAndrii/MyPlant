@@ -737,6 +737,134 @@ try {
     Write-Host "[FAIL] Trend retrieval failed: $($_.Exception.Message)" -ForegroundColor Red
 }
 
+# ==================== SUGGESTION PHASES ====================
+
+$SUGGESTION_TEXT_1 = "E2E suggestion one - improve performance"
+$SUGGESTION_TEXT_2 = "E2E suggestion two - add dark mode"
+
+# Phase S1: Load suggestions page
+Write-Host ""
+Write-Host "PHASE S1: Load suggestions page..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/suggestions" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    if ($resp.StatusCode -eq 200 -and (ConvertResponseToString $resp.Content) -match "App Suggestions") {
+        Add-ReportEntry "SUGGESTIONS PAGE" "PASS" $resp.StatusCode "page rendered"
+        Write-Host "[OK] Suggestions page loaded successfully" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "SUGGESTIONS PAGE" "FAIL" $resp.StatusCode "unexpected response"
+        Write-Host "[FAIL] Suggestions page did not render expected content (HTTP $($resp.StatusCode))" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "SUGGESTIONS PAGE" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase S2: Add first suggestion
+Write-Host ""
+Write-Host "PHASE S2: Add first suggestion..." -ForegroundColor Cyan
+
+try {
+    $suggBody = "text=$([Uri]::EscapeDataString($SUGGESTION_TEXT_1))"
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/suggestions" -Method POST `
+        -Body $suggBody -ContentType "application/x-www-form-urlencoded" `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    # POST redirects to GET /suggestions (302 -> 200)
+    if ($resp.StatusCode -eq 200) {
+        Add-ReportEntry "ADD SUGGESTION 1" "PASS" $resp.StatusCode "redirected to page"
+        Write-Host "[OK] First suggestion submitted" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "ADD SUGGESTION 1" "FAIL" $resp.StatusCode "unexpected status"
+        Write-Host "[FAIL] Unexpected HTTP $($resp.StatusCode)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "ADD SUGGESTION 1" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase S3: Add second suggestion
+Write-Host ""
+Write-Host "PHASE S3: Add second suggestion..." -ForegroundColor Cyan
+
+try {
+    $suggBody = "text=$([Uri]::EscapeDataString($SUGGESTION_TEXT_2))"
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/suggestions" -Method POST `
+        -Body $suggBody -ContentType "application/x-www-form-urlencoded" `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    if ($resp.StatusCode -eq 200) {
+        Add-ReportEntry "ADD SUGGESTION 2" "PASS" $resp.StatusCode "redirected to page"
+        Write-Host "[OK] Second suggestion submitted" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "ADD SUGGESTION 2" "FAIL" $resp.StatusCode "unexpected status"
+        Write-Host "[FAIL] Unexpected HTTP $($resp.StatusCode)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "ADD SUGGESTION 2" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase S4: Verify both suggestions saved and newest is first
+Write-Host ""
+Write-Host "PHASE S4: Verify suggestions saved and sorted newest-first..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/suggestions/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $allSuggestions = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    $found1 = $allSuggestions | Where-Object { $_.text -eq $SUGGESTION_TEXT_1 }
+    $found2 = $allSuggestions | Where-Object { $_.text -eq $SUGGESTION_TEXT_2 }
+    # Newest-first: suggestion 2 (added last) should appear before suggestion 1
+    $idx1 = [array]::IndexOf($allSuggestions, ($allSuggestions | Where-Object { $_.text -eq $SUGGESTION_TEXT_1 } | Select-Object -First 1))
+    $idx2 = [array]::IndexOf($allSuggestions, ($allSuggestions | Where-Object { $_.text -eq $SUGGESTION_TEXT_2 } | Select-Object -First 1))
+    if ($found1 -and $found2 -and $idx2 -lt $idx1) {
+        Add-ReportEntry "VERIFY SUGGESTIONS" "PASS" $resp.StatusCode "2 suggestions, newest first"
+        Write-Host "[OK] Both suggestions saved; newest (suggestion 2) is first in list" -ForegroundColor Green
+    } elseif ($found1 -and $found2) {
+        Add-ReportEntry "VERIFY SUGGESTIONS" "FAIL" $resp.StatusCode "found but order wrong (idx1=$idx1 idx2=$idx2)"
+        Write-Host "[FAIL] Suggestions found but not sorted newest-first (idx2=$idx2 should be < idx1=$idx1)" -ForegroundColor Red
+    } else {
+        Add-ReportEntry "VERIFY SUGGESTIONS" "FAIL" $resp.StatusCode "one or both suggestions missing"
+        Write-Host "[FAIL] Expected 2 suggestions, found: $($allSuggestions.Count)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY SUGGESTIONS" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase S5: Verify blank suggestion is rejected (not saved)
+Write-Host ""
+Write-Host "PHASE S5: Verify blank suggestion is not saved..." -ForegroundColor Cyan
+
+try {
+    $countBefore = 0
+    $respBefore = Invoke-WebRequest -Uri "$BaseUrl/suggestions/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $countBefore = (ConvertFrom-Json (ConvertResponseToString $respBefore.Content)).Count
+
+    $suggBody = "text=   "
+    Invoke-WebRequest -Uri "$BaseUrl/suggestions" -Method POST `
+        -Body $suggBody -ContentType "application/x-www-form-urlencoded" `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop | Out-Null
+
+    $respAfter = Invoke-WebRequest -Uri "$BaseUrl/suggestions/all" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $countAfter = (ConvertFrom-Json (ConvertResponseToString $respAfter.Content)).Count
+
+    if ($countAfter -eq $countBefore) {
+        Add-ReportEntry "BLANK SUGGESTION" "PASS" "200" "count unchanged ($countAfter)"
+        Write-Host "[OK] Blank suggestion correctly ignored (count=$countAfter)" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "BLANK SUGGESTION" "FAIL" "200" "count changed $countBefore -> $countAfter"
+        Write-Host "[FAIL] Blank suggestion was saved (count went from $countBefore to $countAfter)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "BLANK SUGGESTION" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# ==================== END SUGGESTION PHASES ====================
+
 # Phase 7: Cleanup - Delete User
 Write-Host ""
 Write-Host "PHASE 7: Cleanup - Delete user..." -ForegroundColor Cyan
