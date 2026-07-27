@@ -3,6 +3,7 @@
 <head>
     <title>My Plant - Trophy</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" th:href="@{/style/bootstrap.css}" href="../../style/bootstrap.css" />
     <link rel="stylesheet" th:href="@{/style/blocks.css}" href="../../style/blocks.css" />
     <link rel="manifest" th:href="@{/manifest.json}" />
@@ -12,6 +13,12 @@
 <nav class="navbar navbar-inverse">
     <div class="container">
         <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" id="navbarToggle"
+                    onclick="document.getElementById('navbar').classList.toggle('in');">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
             <a class="navbar-brand" href="/home">My Brick Plant<span th:if="${appEnv == 'dev'}" class="env-badge">DEV</span></a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
