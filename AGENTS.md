@@ -177,3 +177,5 @@ Skills live under `.github/skills/`. Read the corresponding `SKILL.md` before ex
 | **myplant-commit-with-push-confirmation** | `.github/skills/myplant-commit-with-push-confirmation/` | commit changes, create commit, git commit, save to git, push changes, commit and push |
 | **myplant-ui-review** | `.github/skills/myplant-ui-review/` | review ui, review frontend, check ui, ui review, frontend review, review blocks.js, review index.html |
 | **myplant-release** | `.github/skills/myplant-release/` | release, ship it, release to master, merge to master, promote develop, publish release, do a release, release changes |
+| **myplant-mongodb** | `.github/skills/myplant-mongodb/` | query mongo, check database, inspect mongo, look at database, mongodb query, check collections, check users in db, find blocks in mongo, count documents, check history, mongo data, database records, what's in mongo, show me data in db |
+| **myplant-coverage** | `.github/skills/myplant-coverage/` | run coverage, check coverage, code coverage, test coverage, coverage report, what is coverage, show coverage, jacoco, untested classes, improve coverage, add coverage |

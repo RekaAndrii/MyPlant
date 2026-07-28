@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,13 +15,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CompositeUserDetailsService implements UserDetailsService {
-
-    private final InMemoryUserDetailsManager inMemoryManager = new InMemoryUserDetailsManager(
-            org.springframework.security.core.userdetails.User
-                    .withUsername("andrii").password("{noop}").roles("USER").build(),
-            org.springframework.security.core.userdetails.User
-                    .withUsername("taras").password("{noop}password").roles("USER").build()
-    );
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -39,6 +31,6 @@ public class CompositeUserDetailsService implements UserDetailsService {
                     .roles("USER")
                     .build();
         }
-        return inMemoryManager.loadUserByUsername(username);
+        throw new UsernameNotFoundException("User not found: " + username);
     }
 }

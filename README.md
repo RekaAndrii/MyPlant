@@ -3,7 +3,7 @@
 MyPlant is a Spring Boot web application for tracking plant-related blocks and actions. It uses Thymeleaf for server-rendered views and MongoDB for persistence.
 
 ## Features
-- Simple authentication with in-memory users
+- MongoDB-backed authentication
 - Plant/block management through web endpoints
 - MongoDB-backed persistence
 - Swagger UI support
@@ -82,29 +82,16 @@ OpenAPI JSON is available at:
 
 - http://localhost:8080/v3/api-docs
 
-## Default login
-The app includes two in-memory users:
-
-- Username: `andrii` | Password: empty
-- Username: `taras` | Password: `password`
-
 ## URL authentication for /home
 You can authenticate directly from a URL using the quick-login endpoint, then get redirected to `/home`.
 
 Endpoint:
 
-- `GET /quick/home?login=<username>&password=<password>`
-
-Examples:
-
-- Empty password user (`andrii`):
-	- `http://localhost:8080/quick/home?login=andrii&password=`
-- User with password (`taras`):
-	- `http://localhost:8080/quick/home?login=taras&password=password`
+- `GET /quick/home?login=<email>&password=<password>`
 
 What happens:
 
-- The endpoint authenticates the credentials.
+- The endpoint authenticates the credentials against registered MongoDB users.
 - On success, it creates an authenticated session.
 - It redirects to `/home`.
 
