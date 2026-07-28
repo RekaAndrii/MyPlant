@@ -26,3 +26,11 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+### Node / npm ###
+node_modules/
+package.json
+package-lock.json
+
+### Stray OS files ###
+nul
