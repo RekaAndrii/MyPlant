@@ -9,6 +9,7 @@
 }
 
 .block-item {
+    position: relative;
     border: 1px solid rgba(0, 0, 0, 0.18);
     border-radius: 6px;
     min-height: 140px;
@@ -181,10 +182,6 @@
 
 /* ---- Edit icons on tiles ---- */
 
-.block-item {
-    position: relative;
-}
-
 .block-edit-icons {
     position: absolute;
     top: 6px;
@@ -310,4 +307,20 @@
     color: #888;
     font-size: 1em;
     vertical-align: middle;
+}
+
+/* ---- Shared page layout utilities ---- */
+
+.page-content {
+    margin-top: 30px;
+}
+
+.btn-bar {
+    margin-top: 8px;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    margin-top: 0;
+    margin-bottom: 16px;
 }

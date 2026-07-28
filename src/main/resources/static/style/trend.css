@@ -1,0 +1,60 @@
+.trend-panel {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.trend-panel .panel-heading {
+    background: #333;
+    border-bottom: 1px solid #444;
+    border-radius: 6px 6px 0 0;
+    padding: 10px 16px;
+}
+
+.trend-panel .panel-title {
+    color: #ccc;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.trend-panel .panel-body {
+    padding: 16px;
+}
+
+.chart-container {
+    height: 260px;
+    width: 100%;
+}
+
+.chart-container svg {
+    width: 100% !important;
+}
+
+.chart-empty {
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Morris overrides for dark background */
+.morris-hover {
+    background: #333 !important;
+    border: 1px solid #555 !important;
+    color: #ddd !important;
+}
+
+.morris-hover-row-label {
+    color: #aaa !important;
+}
+
+@media (max-width: 767px) {
+    .trend-row-top > div {
+        width: 100%;
+    }
+}
