@@ -1,29 +1,12 @@
 $(function() {
-
-    // Redirect to login if any AJAX call is intercepted by Spring Security
-    // (session expired: server returns 200 with the login page body)
-    $(document).ajaxComplete(function (event, xhr) {
-        if (xhr.responseURL && xhr.responseURL.indexOf('/login') !== -1) {
-            window.location.href = '/login';
-        }
-    });
-
     initBlockEvent();
     initAddBlockEvent();
     initEditMode();
     initDayFilter();
-    initNavbarToggle();
     console.log( "ready!" );
 });
 
 var editModeActive = false;
-
-// Toggle the collapsed navbar menu on mobile (Bootstrap 3 JS is not loaded).
-function initNavbarToggle() {
-    $(document).on("click", "#navbarToggle", function () {
-        $("#navbar").toggleClass("in");
-    });
-}
 
 var DAY_FILTER_KEY = "myplant.dayFilter";
 

@@ -7,10 +7,10 @@
 
     <link rel="stylesheet" th:href="@{/style/bootstrap.css}" href="../../style/bootstrap.css" />
     <link rel="stylesheet" th:href="@{/style/blocks.css}" href="../../style/blocks.css" />
-    <!--<link rel="stylesheet" th:href="@{/style/mdb.css}" href="../../style/mdb.css" />-->
     <link rel="manifest" th:href="@{/manifest.json}" />
 
     <script th:src="@{/js/jquery-3.2.1.min.js}" src="../../js/jquery-3.2.1.min.js"></script>
+    <script th:src="@{/js/app.js}" src="../../js/app.js"></script>
     <script th:src="@{/js/blocks.js}" src="../../js/blocks.js"></script>
     <script>
         (function () {
@@ -40,29 +40,7 @@
 </head>
 <body>
 
-<nav class="navbar navbar-inverse">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" id="navbarToggle">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/home">My Brick Plant<span th:if="${appEnv == 'dev'}" class="env-badge">DEV</span></a>
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-            <ul class="nav navbar-nav">
-                <li class="active"><a href="/home">Home</a></li>
-                <li><a href="/trend">Trends</a></li>
-                <li><a href="/achievements">Trophy</a></li>
-                <li><a href="/suggestions">Suggestions</a></li>
-            </ul>
-            <form th:action="@{/logout}" method="post" class="navbar-form navbar-right">
-                <button type="submit" class="btn btn-default">Logout</button>
-            </form>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/navbar :: navbar('home')}"></nav>
 
 <div class="container" style="padding-top: 0; margin-top: 0;">
     <div class="row" th:if="${errorMessage}">
@@ -99,7 +77,7 @@
     </div>
 
     <div class="row">
-        <div class="col-xs-12 text-center" style="margin-top: 8px; margin-bottom: 20px;">
+        <div class="col-xs-12 text-center btn-bar">
             <button id="dayFilterBtn" class="edit-toggle-btn" type="button">Today only: Off</button>
             <button id="editModeBtn" class="edit-toggle-btn" type="button">Edit</button>
         </div>
@@ -110,7 +88,7 @@
 <!-- Add Block Modal -->
 <div id="addBlockModal" class="add-block-modal-overlay" style="display:none;">
     <div class="add-block-modal-dialog">
-        <h4 style="margin-top: 0; margin-bottom: 16px;">New block</h4>
+        <h4 class="modal-title">New block</h4>
         <input id="newBlockName" type="text" class="form-control" placeholder="Block name" style="margin-bottom: 12px;" />
         <label style="font-weight: normal; cursor: pointer; font-size: 13px;">
             <input id="isChallengeCheck" type="checkbox" style="margin-right: 4px;" />
@@ -122,15 +100,7 @@
         </div>
         <div class="scheduled-days" style="margin-top: 12px;">
             <div class="scheduled-days-label">Scheduled days (leave empty for every day)</div>
-            <div id="addScheduledDays" class="scheduled-days-row">
-                <label class="day-checkbox"><input type="checkbox" data-day="1" /><span>Mon</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="2" /><span>Tue</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="3" /><span>Wed</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="4" /><span>Thu</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="5" /><span>Fri</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="6" /><span>Sat</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="7" /><span>Sun</span></label>
-            </div>
+            <div th:replace="~{fragments/day-checkboxes :: scheduledDays('addScheduledDays')}"></div>
         </div>
         <div style="margin-top: 16px;">
             <button id="submitBlockBtn" class="btn btn-primary" type="button">Add</button>
@@ -142,7 +112,7 @@
 <!-- Edit Block Modal -->
 <div id="editBlockModal" class="add-block-modal-overlay" style="display:none;">
     <div class="add-block-modal-dialog">
-        <h4 style="margin-top: 0; margin-bottom: 16px;">Edit block</h4>
+        <h4 class="modal-title">Edit block</h4>
         <input id="editBlockOriginalName" type="hidden" />
         <input id="editBlockName" type="text" class="form-control" placeholder="Block name" style="margin-bottom: 12px;" />
         <label style="font-weight: normal; cursor: pointer; font-size: 13px;">
@@ -155,15 +125,7 @@
         </div>
         <div class="scheduled-days" style="margin-top: 12px;">
             <div class="scheduled-days-label">Scheduled days (leave empty for every day)</div>
-            <div id="editScheduledDays" class="scheduled-days-row">
-                <label class="day-checkbox"><input type="checkbox" data-day="1" /><span>Mon</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="2" /><span>Tue</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="3" /><span>Wed</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="4" /><span>Thu</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="5" /><span>Fri</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="6" /><span>Sat</span></label>
-                <label class="day-checkbox"><input type="checkbox" data-day="7" /><span>Sun</span></label>
-            </div>
+            <div th:replace="~{fragments/day-checkboxes :: scheduledDays('editScheduledDays')}"></div>
         </div>
         <div style="margin-top: 16px;">
             <button id="saveEditBtn" class="btn btn-primary" type="button">Save</button>
