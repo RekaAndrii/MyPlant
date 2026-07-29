@@ -138,17 +138,9 @@ function renderDailyLine(data) {
         return;
     }
 
-    // Shorten date labels to "Jul 1" style to avoid crowding
-    var chartData = data.map(function(d) {
-        var parts = d.date.split('-'); // yyyy-MM-dd
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        var label = months[parseInt(parts[1], 10) - 1] + ' ' + parseInt(parts[2], 10);
-        return { date: label, count: d.count };
-    });
-
     Morris.Line({
         element: 'daily-line-chart',
-        data: chartData,
+        data: data,
         xkey: 'date',
         ykeys: ['count'],
         labels: ['Executions'],
@@ -160,6 +152,16 @@ function renderDailyLine(data) {
         pointSize: 3,
         resize: true,
         hideHover: false,
-        smooth: false
+        smooth: false,
+        xLabelFormat: function(x) {
+            var d = new Date(x);
+            var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return months[d.getMonth()] + ' ' + d.getDate();
+        },
+        dateFormat: function(x) {
+            var d = new Date(x);
+            var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+        }
     });
 }
