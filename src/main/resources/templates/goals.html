@@ -1,0 +1,201 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Plant - Goals</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" th:href="@{/style/bootstrap.css}" href="../../style/bootstrap.css" />
+    <link rel="stylesheet" th:href="@{/style/blocks.css}" href="../../style/blocks.css" />
+    <link rel="manifest" th:href="@{/manifest.json}" />
+    <script th:src="@{/js/jquery-3.2.1.min.js}" src="../../js/jquery-3.2.1.min.js"></script>
+    <script th:src="@{/js/app.js}" src="../../js/app.js"></script>
+    <script th:src="@{/js/goals.js}" src="../../js/goals.js"></script>
+</head>
+<body>
+
+<nav th:replace="~{fragments/navbar :: navbar('goals')}"></nav>
+
+<div class="container page-content">
+    <div class="row" th:if="${errorMessage}">
+        <div class="col-xs-12">
+            <div class="alert alert-warning" th:text="${errorMessage}"></div>
+        </div>
+    </div>
+
+    <!-- Page header -->
+    <div class="row goals-page-header">
+        <div class="col-xs-8">
+            <h3 class="goals-page-title">Goals</h3>
+        </div>
+        <div class="col-xs-4 text-right">
+            <button id="addGoalBtn" class="btn btn-primary btn-sm" type="button">+ Add Goal</button>
+        </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="row" th:if="${goals == null or #lists.isEmpty(goals)}">
+        <div class="col-xs-12">
+            <p class="text-muted">No goals yet. Click <strong>+ Add Goal</strong> to get started.</p>
+        </div>
+    </div>
+
+    <!-- Goals list -->
+    <div th:each="goal : ${goals}" class="goal-card" th:classappend="${goal.done} ? 'goal-done'" th:attr="data-goal-id=${goal.get_id()}">
+        <div class="goal-card-header">
+            <div class="goal-header-left">
+                <!-- Custom toggle switch for goal done state -->
+                <label class="goal-toggle" title="Mark goal done">
+                    <input type="checkbox" class="goal-done-check" th:checked="${goal.done}" />
+                    <span class="goal-toggle-track">
+                        <span class="goal-toggle-thumb"></span>
+                    </span>
+                </label>
+                <span class="goal-name" th:text="${goal.name}"></span>
+            </div>
+            <div class="goal-header-actions">
+                <button class="goal-edit-btn btn btn-xs btn-default" type="button" title="Rename goal">&#9998;</button>
+                <button class="goal-delete-btn btn btn-xs btn-danger" type="button" title="Delete goal">&#128465;</button>
+            </div>
+        </div>
+
+        <!-- Delete confirm overlay -->
+        <div class="goal-delete-confirm" style="display:none;">
+            <span>Delete goal and all its steps?</span>
+            <button class="confirm-goal-delete-yes btn btn-danger btn-sm" type="button">Yes</button>
+            <button class="confirm-goal-delete-no btn btn-default btn-sm" type="button">No</button>
+        </div>
+
+        <!-- Steps list -->
+        <div class="goal-steps-list">
+            <div th:each="step,iterStat : ${stepsByGoalId.get(goal.get_id())}"
+                 class="step-item"
+                 th:classappend="${step.done} ? 'step-done'"
+                 th:attr="data-step-id=${step.get_id()},data-step-order=${step.order},data-goal-id=${goal.get_id()}">
+                <!-- Custom toggle for step done -->
+                <label class="step-toggle" title="Mark step done">
+                    <input type="checkbox" class="step-done-check" th:checked="${step.done}" />
+                    <span class="step-toggle-track">
+                        <span class="step-toggle-thumb"></span>
+                    </span>
+                </label>
+                <span class="step-name" th:text="${step.name}"></span>
+                <span th:each="bn : ${step.linkedBlockNames}" class="block-badge" th:text="${bn}"></span>
+                <div class="step-actions">
+                    <button class="step-move-up btn btn-xs btn-default" type="button" title="Move up"
+                            th:disabled="${iterStat.first}">&#9650;</button>
+                    <button class="step-move-down btn btn-xs btn-default" type="button" title="Move down"
+                            th:disabled="${iterStat.last}">&#9660;</button>
+                    <button class="step-edit-btn btn btn-xs btn-default" type="button" title="Edit step"
+                            th:attr="data-step-name=${step.name},data-linked-blocks=${step.linkedBlockNames != null} ? ${#strings.listJoin(step.linkedBlockNames, ',')} : ''">&#9998;</button>
+                    <button class="step-delete-btn btn btn-xs btn-danger" type="button" title="Delete step">&#128465;</button>
+                </div>
+            </div>
+
+            <!-- Empty steps state -->
+            <div class="step-empty-state"
+                 th:if="${stepsByGoalId.get(goal.get_id()) == null or #lists.isEmpty(stepsByGoalId.get(goal.get_id()))}">
+                <span class="text-muted" style="font-size:12px;">No steps yet.</span>
+            </div>
+        </div>
+
+        <div class="goal-card-footer">
+            <button class="add-step-btn btn btn-xs btn-default" type="button" th:attr="data-goal-id=${goal.get_id()}">+ Add Step</button>
+        </div>
+    </div>
+
+    <!-- ── Completed Challenges section ───────────────────────────────────── -->
+    <div class="row" style="margin-top: 40px;">
+        <div class="col-xs-12">
+            <h4 class="goals-section-title">Completed Challenges (no goal)</h4>
+        </div>
+    </div>
+
+    <div class="row" th:if="${unlinkedAchievements == null or #lists.isEmpty(unlinkedAchievements)}">
+        <div class="col-xs-12">
+            <p class="text-muted">No completed challenges yet.</p>
+        </div>
+    </div>
+
+    <div th:if="${unlinkedAchievements != null and not #lists.isEmpty(unlinkedAchievements)}">
+        <div th:each="a : ${unlinkedAchievements}" class="achievement-card">
+            <div class="achievement-icon">&#9733;</div>
+            <div class="achievement-info">
+                <span class="achievement-name" th:text="${a.goalName}"></span>
+                <span class="achievement-meta">
+                    <span class="achievement-target" th:text="'Target: ' + ${a.targetExecutions}"></span>
+                    <span class="achievement-date" th:text="${a.achievedDate}"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Add Goal Modal ─────────────────────────────────────────────────────── -->
+<div id="addGoalModal" class="add-block-modal-overlay" style="display:none;">
+    <div class="add-block-modal-dialog">
+        <h4 class="modal-title">New Goal</h4>
+        <input id="newGoalName" type="text" class="form-control" placeholder="Goal name" style="margin-bottom: 16px;" />
+        <div>
+            <button id="submitGoalBtn" class="btn btn-primary" type="button">Add Goal</button>
+            <button id="cancelGoalBtn" class="btn btn-default" type="button" style="margin-left: 8px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Edit Goal Modal ────────────────────────────────────────────────────── -->
+<div id="editGoalModal" class="add-block-modal-overlay" style="display:none;">
+    <div class="add-block-modal-dialog">
+        <h4 class="modal-title">Rename Goal</h4>
+        <input id="editGoalId" type="hidden" />
+        <input id="editGoalName" type="text" class="form-control" placeholder="Goal name" style="margin-bottom: 16px;" />
+        <div>
+            <button id="saveGoalBtn" class="btn btn-primary" type="button">Save</button>
+            <button id="cancelEditGoalBtn" class="btn btn-default" type="button" style="margin-left: 8px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Add Step Modal ─────────────────────────────────────────────────────── -->
+<div id="addStepModal" class="add-block-modal-overlay" style="display:none;">
+    <div class="add-block-modal-dialog">
+        <h4 class="modal-title">Add Step</h4>
+        <input id="addStepGoalId" type="hidden" />
+        <input id="newStepName" type="text" class="form-control" placeholder="Step name" style="margin-bottom: 12px;" />
+        <label class="goals-form-label">Link to blocks (optional)</label>
+        <div id="addStepBlocks" class="step-block-pills">
+            <label th:each="b : ${availableBlocks}" class="step-block-pill">
+                <input type="checkbox" th:value="${b}" />
+                <span th:text="${b}"></span>
+            </label>
+            <span th:if="${availableBlocks == null or #lists.isEmpty(availableBlocks)}" class="text-muted" style="font-size:12px;">No blocks available.</span>
+        </div>
+        <div style="margin-top: 16px;">
+            <button id="submitStepBtn" class="btn btn-primary" type="button">Add Step</button>
+            <button id="cancelStepBtn" class="btn btn-default" type="button" style="margin-left: 8px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Edit Step Modal ────────────────────────────────────────────────────── -->
+<div id="editStepModal" class="add-block-modal-overlay" style="display:none;">
+    <div class="add-block-modal-dialog">
+        <h4 class="modal-title">Edit Step</h4>
+        <input id="editStepId" type="hidden" />
+        <input id="editStepName" type="text" class="form-control" placeholder="Step name" style="margin-bottom: 12px;" />
+        <label class="goals-form-label">Link to blocks (optional)</label>
+        <div id="editStepBlocks" class="step-block-pills">
+            <label th:each="b : ${availableBlocks}" class="step-block-pill">
+                <input type="checkbox" th:value="${b}" />
+                <span th:text="${b}"></span>
+            </label>
+            <span th:if="${availableBlocks == null or #lists.isEmpty(availableBlocks)}" class="text-muted" style="font-size:12px;">No blocks available.</span>
+        </div>
+        <div style="margin-top: 16px;">
+            <button id="saveStepBtn" class="btn btn-primary" type="button">Save</button>
+            <button id="cancelEditStepBtn" class="btn btn-default" type="button" style="margin-left: 8px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

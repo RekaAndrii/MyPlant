@@ -917,6 +917,375 @@ try {
 
 # ==================== END SUGGESTION PHASES ====================
 
+# ==================== GOAL PHASES ====================
+
+$GOAL_NAME       = "E2EGoal"
+$GOAL_RENAMED    = "E2EGoalRenamed"
+$STEP1_NAME      = "E2EStep1"
+$STEP2_NAME      = "E2EStep2"
+$STEP2_RENAMED   = "E2EStep2Edited"
+
+# Helper: extract first data-goal-id from HTML
+function Get-GoalIdFromPage {
+    param([string]$Html, [string]$GoalName)
+    # Match goal-card div that contains the goal name and grab its data-goal-id
+    if ($Html -match 'data-goal-id="([^"]+)"[^>]*>[\s\S]*?' + [regex]::Escape($GoalName)) {
+        return $Matches[1]
+    }
+    # Fallback: first data-goal-id on the page
+    if ($Html -match 'data-goal-id="([^"]+)"') {
+        return $Matches[1]
+    }
+    return $null
+}
+
+# Helper: extract step IDs from HTML for a given goal section
+function Get-StepIdsFromPage {
+    param([string]$Html)
+    $ids = @()
+    $pattern = 'data-step-id="([^"]+)"'
+    $stepMatches = [regex]::Matches($Html, $pattern)
+    foreach ($m in $stepMatches) {
+        $ids += $m.Groups[1].Value
+    }
+    return $ids
+}
+
+# Phase G1: Create goal
+Write-Host ""
+Write-Host "PHASE G1: Create goal..." -ForegroundColor Cyan
+
+$goalId = $null
+try {
+    $goalBody = @{ name = $GOAL_NAME } | ConvertTo-Json
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/goals/" -Method POST -Body $goalBody `
+        -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "CREATE GOAL" "PASS" $resp.StatusCode "{hasError:false}"
+        Write-Host "[OK] Goal '$GOAL_NAME' created" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "CREATE GOAL" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Goal creation returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "CREATE GOAL" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase G2: Load goals page and extract goal ID
+Write-Host ""
+Write-Host "PHASE G2: Load goals page and extract goal ID..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/goals" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $goalsHtml = ConvertResponseToString $resp.Content
+    if ($resp.StatusCode -eq 200 -and $goalsHtml -match "Goals") {
+        $goalId = Get-GoalIdFromPage -Html $goalsHtml -GoalName $GOAL_NAME
+        if ($goalId) {
+            Add-ReportEntry "GOALS PAGE" "PASS" $resp.StatusCode "goalId=$goalId"
+            Write-Host "[OK] Goals page rendered; goalId=$goalId" -ForegroundColor Green
+        } else {
+            Add-ReportEntry "GOALS PAGE" "FAIL" $resp.StatusCode "data-goal-id not found"
+            Write-Host "[FAIL] Could not extract goalId from page" -ForegroundColor Red
+        }
+    } else {
+        Add-ReportEntry "GOALS PAGE" "FAIL" $resp.StatusCode "unexpected response"
+        Write-Host "[FAIL] Goals page did not render expected content" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "GOALS PAGE" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+if (-not $goalId) {
+    Write-Host "[WARN] Skipping goal step phases - no goalId available" -ForegroundColor Yellow
+} else {
+
+# Phase G3: Add first step (no linked block)
+Write-Host ""
+Write-Host "PHASE G3: Add step 1 to goal..." -ForegroundColor Cyan
+
+try {
+    $step1Body = @{ name = $STEP1_NAME; linkedBlockNames = @() } | ConvertTo-Json
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/goals/$goalId/steps" -Method POST -Body $step1Body `
+        -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "ADD STEP 1" "PASS" $resp.StatusCode "{hasError:false}"
+        Write-Host "[OK] Step 1 '$STEP1_NAME' added" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "ADD STEP 1" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Step 1 creation returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "ADD STEP 1" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase G4: Add second step linked to challenge block
+Write-Host ""
+Write-Host "PHASE G4: Add step 2 (linked to $CHALLENGE_BLOCK_NAME)..." -ForegroundColor Cyan
+
+try {
+    $step2Body = @{ name = $STEP2_NAME; linkedBlockNames = @($CHALLENGE_BLOCK_NAME) } | ConvertTo-Json
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/goals/$goalId/steps" -Method POST -Body $step2Body `
+        -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "ADD STEP 2" "PASS" $resp.StatusCode "{hasError:false}"
+        Write-Host "[OK] Step 2 '$STEP2_NAME' added (linked=$CHALLENGE_BLOCK_NAME)" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "ADD STEP 2" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Step 2 creation returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "ADD STEP 2" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase G5: Verify steps exist on goals page
+Write-Host ""
+Write-Host "PHASE G5: Verify steps visible on goals page..." -ForegroundColor Cyan
+
+$stepIds = @()
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/goals" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $goalsHtml = ConvertResponseToString $resp.Content
+    $hasStep1 = $goalsHtml -match [regex]::Escape($STEP1_NAME)
+    $hasStep2 = $goalsHtml -match [regex]::Escape($STEP2_NAME)
+    $stepIds = Get-StepIdsFromPage -Html $goalsHtml
+    if ($hasStep1 -and $hasStep2 -and $stepIds.Count -ge 2) {
+        Add-ReportEntry "VERIFY STEPS" "PASS" $resp.StatusCode "2 steps found"
+        Write-Host "[OK] Both steps visible on page; stepIds=$($stepIds -join ',')" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "VERIFY STEPS" "FAIL" $resp.StatusCode "step1=$hasStep1 step2=$hasStep2 ids=$($stepIds.Count)"
+        Write-Host "[FAIL] Steps not found on page (step1=$hasStep1 step2=$hasStep2)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY STEPS" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+$step1Id = if ($stepIds.Count -ge 1) { $stepIds[0] } else { $null }
+$step2Id = if ($stepIds.Count -ge 2) { $stepIds[1] } else { $null }
+
+# Phase G6: Toggle step 1 done
+Write-Host ""
+Write-Host "PHASE G6: Toggle step 1 done..." -ForegroundColor Cyan
+
+if ($step1Id) {
+    try {
+        $doneBody = @{ done = $true } | ConvertTo-Json
+        $resp = Invoke-WebRequest -Uri "$BaseUrl/goals/steps/$step1Id/done" -Method PUT -Body $doneBody `
+            -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+        $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+        if (-not $respData.hasError) {
+            Add-ReportEntry "TOGGLE STEP DONE" "PASS" $resp.StatusCode "stepId=$step1Id done=true"
+            Write-Host "[OK] Step 1 marked done" -ForegroundColor Green
+        } else {
+            Add-ReportEntry "TOGGLE STEP DONE" "FAIL" $resp.StatusCode "hasError=true"
+            Write-Host "[FAIL] Toggle step done returned error" -ForegroundColor Red
+        }
+    } catch {
+        Add-ReportEntry "TOGGLE STEP DONE" "FAIL" "ERR" $_.Exception.Message
+        Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+    }
+} else {
+    Add-ReportEntry "TOGGLE STEP DONE" "FAIL" "N/A" "stepId not available"
+    Write-Host "[SKIP] No step1Id to toggle" -ForegroundColor Yellow
+}
+
+# Phase G7: Move step 2 up (swap with step 1)
+Write-Host ""
+Write-Host "PHASE G7: Move step 2 up..." -ForegroundColor Cyan
+
+if ($step2Id) {
+    try {
+        $moveBody = @{ direction = "up" } | ConvertTo-Json
+        $resp = Invoke-WebRequest -Uri "$BaseUrl/goals/steps/$step2Id/move" -Method PUT -Body $moveBody `
+            -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+        $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+        if (-not $respData.hasError) {
+            Add-ReportEntry "MOVE STEP UP" "PASS" $resp.StatusCode "stepId=$step2Id direction=up"
+            Write-Host "[OK] Step 2 moved up" -ForegroundColor Green
+        } else {
+            Add-ReportEntry "MOVE STEP UP" "FAIL" $resp.StatusCode "hasError=true"
+            Write-Host "[FAIL] Move step up returned error" -ForegroundColor Red
+        }
+    } catch {
+        Add-ReportEntry "MOVE STEP UP" "FAIL" "ERR" $_.Exception.Message
+        Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+    }
+} else {
+    Add-ReportEntry "MOVE STEP UP" "FAIL" "N/A" "step2Id not available"
+    Write-Host "[SKIP] No step2Id to move" -ForegroundColor Yellow
+}
+
+# Phase G8: Edit step 2 (rename, remove linked block)
+Write-Host ""
+Write-Host "PHASE G8: Edit step 2 (rename to $STEP2_RENAMED)..." -ForegroundColor Cyan
+
+if ($step2Id) {
+    try {
+        $editStepBody = @{ name = $STEP2_RENAMED; linkedBlockNames = @() } | ConvertTo-Json
+        $resp = Invoke-WebRequest -Uri "$BaseUrl/goals/steps/$step2Id" -Method PUT -Body $editStepBody `
+            -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+        $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+        if (-not $respData.hasError) {
+            Add-ReportEntry "EDIT STEP" "PASS" $resp.StatusCode "renamed to $STEP2_RENAMED"
+            Write-Host "[OK] Step 2 renamed to '$STEP2_RENAMED'" -ForegroundColor Green
+        } else {
+            Add-ReportEntry "EDIT STEP" "FAIL" $resp.StatusCode "hasError=true"
+            Write-Host "[FAIL] Edit step returned error" -ForegroundColor Red
+        }
+    } catch {
+        Add-ReportEntry "EDIT STEP" "FAIL" "ERR" $_.Exception.Message
+        Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+    }
+} else {
+    Add-ReportEntry "EDIT STEP" "FAIL" "N/A" "step2Id not available"
+    Write-Host "[SKIP] No step2Id to edit" -ForegroundColor Yellow
+}
+
+# Phase G9: Toggle goal done
+Write-Host ""
+Write-Host "PHASE G9: Toggle goal done..." -ForegroundColor Cyan
+
+try {
+    $goalDoneBody = @{ done = $true } | ConvertTo-Json
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/goals/$goalId/done" -Method PUT -Body $goalDoneBody `
+        -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "TOGGLE GOAL DONE" "PASS" $resp.StatusCode "goalId=$goalId done=true"
+        Write-Host "[OK] Goal marked done" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "TOGGLE GOAL DONE" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Toggle goal done returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "TOGGLE GOAL DONE" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase G10: Rename goal
+Write-Host ""
+Write-Host "PHASE G10: Rename goal to '$GOAL_RENAMED'..." -ForegroundColor Cyan
+
+try {
+    $renameGoalBody = @{ name = $GOAL_RENAMED } | ConvertTo-Json
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/goals/$goalId" -Method PUT -Body $renameGoalBody `
+        -ContentType "application/json" -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "RENAME GOAL" "PASS" $resp.StatusCode "renamed to $GOAL_RENAMED"
+        Write-Host "[OK] Goal renamed to '$GOAL_RENAMED'" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "RENAME GOAL" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Rename goal returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "RENAME GOAL" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase G11: Verify renamed goal and done state on page
+Write-Host ""
+Write-Host "PHASE G11: Verify goal renamed and done on page..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/goals" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $goalsHtml = ConvertResponseToString $resp.Content
+    $hasRenamed  = $goalsHtml -match [regex]::Escape($GOAL_RENAMED)
+    $hasDone     = $goalsHtml -match 'goal-done'
+    $hasEdited   = $goalsHtml -match [regex]::Escape($STEP2_RENAMED)
+    if ($hasRenamed -and $hasDone -and $hasEdited) {
+        Add-ReportEntry "VERIFY GOAL STATE" "PASS" $resp.StatusCode "renamed+done+step2edited"
+        Write-Host "[OK] Goal renamed, done state set, step 2 rename verified" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "VERIFY GOAL STATE" "FAIL" $resp.StatusCode "renamed=$hasRenamed done=$hasDone step2=$hasEdited"
+        Write-Host "[FAIL] Verification failed (renamed=$hasRenamed done=$hasDone step2=$hasEdited)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY GOAL STATE" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase G12: Delete step 1
+Write-Host ""
+Write-Host "PHASE G12: Delete step 1..." -ForegroundColor Cyan
+
+if ($step1Id) {
+    try {
+        $resp = Invoke-WebRequest -Uri "$BaseUrl/goals/steps/$step1Id" -Method DELETE `
+            -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+        $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+        if (-not $respData.hasError) {
+            Add-ReportEntry "DELETE STEP" "PASS" $resp.StatusCode "stepId=$step1Id deleted"
+            Write-Host "[OK] Step 1 deleted" -ForegroundColor Green
+        } else {
+            Add-ReportEntry "DELETE STEP" "FAIL" $resp.StatusCode "hasError=true"
+            Write-Host "[FAIL] Delete step returned error" -ForegroundColor Red
+        }
+    } catch {
+        Add-ReportEntry "DELETE STEP" "FAIL" "ERR" $_.Exception.Message
+        Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+    }
+} else {
+    Add-ReportEntry "DELETE STEP" "FAIL" "N/A" "step1Id not available"
+    Write-Host "[SKIP] No step1Id to delete" -ForegroundColor Yellow
+}
+
+# Phase G13: Delete goal (cascade deletes remaining step)
+Write-Host ""
+Write-Host "PHASE G13: Delete goal (cascade)..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/goals/$goalId" -Method DELETE `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $respData = ConvertFrom-Json (ConvertResponseToString $resp.Content)
+    if (-not $respData.hasError) {
+        Add-ReportEntry "DELETE GOAL" "PASS" $resp.StatusCode "goalId=$goalId + steps deleted"
+        Write-Host "[OK] Goal and all its steps deleted" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "DELETE GOAL" "FAIL" $resp.StatusCode "hasError=true"
+        Write-Host "[FAIL] Delete goal returned error" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "DELETE GOAL" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Phase G14: Verify goals page is now empty
+Write-Host ""
+Write-Host "PHASE G14: Verify goals page is empty after deletion..." -ForegroundColor Cyan
+
+try {
+    $resp = Invoke-WebRequest -Uri "$BaseUrl/goals" -Method GET `
+        -WebSession $webSession -UseBasicParsing -ErrorAction Stop
+    $goalsHtml = ConvertResponseToString $resp.Content
+    $goalGone    = -not ($goalsHtml -match [regex]::Escape($GOAL_RENAMED))
+    $noGoalCards = -not ($goalsHtml -match 'class=.goal-card')
+    if ($goalGone -and $noGoalCards) {
+        Add-ReportEntry "VERIFY GOAL DELETED" "PASS" $resp.StatusCode "no goal cards on page"
+        Write-Host "[OK] Goals page empty after deletion" -ForegroundColor Green
+    } else {
+        Add-ReportEntry "VERIFY GOAL DELETED" "FAIL" $resp.StatusCode "goalGone=$goalGone noCards=$noGoalCards"
+        Write-Host "[FAIL] Goal still appears on page (goalGone=$goalGone noCards=$noGoalCards)" -ForegroundColor Red
+    }
+} catch {
+    Add-ReportEntry "VERIFY GOAL DELETED" "FAIL" "ERR" $_.Exception.Message
+    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+} # end if $goalId
+
+# ==================== END GOAL PHASES ====================
+
 # Phase 7: Cleanup - Delete User
 Write-Host ""
 Write-Host "PHASE 7: Cleanup - Delete user..." -ForegroundColor Cyan

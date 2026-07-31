@@ -324,3 +324,392 @@
     margin-top: 0;
     margin-bottom: 16px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Goals page
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.goals-page-header {
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.goals-page-title {
+    margin-top: 0;
+    margin-bottom: 0;
+    color: #ddd;
+}
+
+.goals-section-title {
+    color: #aaa;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+}
+
+/* ── Goal card ── */
+
+.goal-card {
+    position: relative;
+    background: #2d2d2d;
+    border: 1px solid #444;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.goal-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #333;
+    border-bottom: 1px solid #444;
+}
+
+.goal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.goal-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.goal-done .goal-name {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.goal-header-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+/* ── Goal toggle switch ── */
+
+.goal-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.goal-toggle input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.goal-toggle-track {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background: #555;
+    border-radius: 10px;
+    border: 1px solid #666;
+    transition: background 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+}
+
+.goal-toggle input:checked ~ .goal-toggle-track {
+    background: #648637;
+    border-color: #7aa347;
+}
+
+.goal-toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: #ccc;
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.goal-toggle input:checked ~ .goal-toggle-track .goal-toggle-thumb {
+    transform: translateX(16px);
+    background: #fff;
+}
+
+/* ── Goal delete confirm overlay ── */
+
+.goal-delete-confirm {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.82);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 20;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* ── Steps list ── */
+
+.goal-steps-list {
+    padding: 6px 16px 4px 16px;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #363636;
+    flex-wrap: wrap;
+}
+
+.step-item:last-child {
+    border-bottom: none;
+}
+
+.step-name {
+    flex: 1;
+    color: #ddd;
+    font-size: 14px;
+    min-width: 80px;
+}
+
+.step-done .step-name {
+    text-decoration: line-through;
+    opacity: 0.45;
+}
+
+/* ── Step toggle switch (compact, no label) ── */
+
+.step-toggle {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.step-toggle input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.step-toggle-track {
+    position: relative;
+    width: 30px;
+    height: 17px;
+    background: #4a4a4a;
+    border-radius: 9px;
+    border: 1px solid #5a5a5a;
+    transition: background 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+}
+
+.step-toggle input:checked ~ .step-toggle-track {
+    background: #648637;
+    border-color: #7aa347;
+}
+
+.step-toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 11px;
+    height: 11px;
+    background: #aaa;
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.step-toggle input:checked ~ .step-toggle-track .step-toggle-thumb {
+    transform: translateX(13px);
+    background: #fff;
+}
+
+.block-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    border-radius: 10px;
+    background: #3a5a1e;
+    color: #9ec860;
+    border: 1px solid #4e7a2a;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.step-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.step-empty-state {
+    padding: 6px 0 4px 0;
+}
+
+/* ── Goal card footer (Add Step button) ── */
+
+.goal-card-footer {
+    padding: 8px 16px 12px 16px;
+    border-top: 1px solid #363636;
+    background: #292929;
+}
+
+/* ── Goals form label ── */
+
+.goals-form-label {
+    font-size: 12px;
+    color: #aaa;
+    font-weight: normal;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* ── Step block pill checkboxes (multi-select in modals) ── */
+
+.step-block-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+    max-height: 140px;
+    overflow-y: auto;
+    padding: 2px;
+}
+
+.step-block-pill {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.step-block-pill input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.step-block-pill span {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 10px;
+    border: 1px solid #555;
+    background: #3a3a3a;
+    color: #bbb;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.step-block-pill input:checked + span {
+    background: #3a5a1e;
+    border-color: #4e7a2a;
+    color: #9ec860;
+}
+
+/* ── Achievement cards (replacing table) ── */
+
+.achievement-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #2d2d2d;
+    border: 1px solid #444;
+    border-left: 3px solid #648637;
+    border-radius: 6px;
+    padding: 11px 16px;
+    margin-bottom: 10px;
+}
+
+.achievement-icon {
+    font-size: 20px;
+    color: #a9a534;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.achievement-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+}
+
+.achievement-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.achievement-meta {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.achievement-target {
+    font-size: 12px;
+    color: #9ec860;
+    background: #3a5a1e;
+    border: 1px solid #4e7a2a;
+    border-radius: 10px;
+    padding: 1px 8px;
+    white-space: nowrap;
+}
+
+.achievement-date {
+    font-size: 12px;
+    color: #888;
+    white-space: nowrap;
+}
+
+/* ── Mobile adjustments for goals ── */
+
+@media (max-width: 767px) {
+    .step-actions {
+        flex-wrap: wrap;
+    }
+
+    .step-item {
+        gap: 6px;
+    }
+
+    .achievement-meta {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+}

@@ -4,7 +4,7 @@
 
 <!--
     Usage: <nav th:replace="~{fragments/navbar :: navbar('home')}"></nav>
-    activePage values: 'home', 'trend', 'achievements', 'suggestions'
+    activePage values: 'home', 'trend', 'goals', 'suggestions'
 -->
 <nav th:fragment="navbar(activePage)" class="navbar navbar-inverse">
     <div class="container">
@@ -20,7 +20,7 @@
             <ul class="nav navbar-nav">
                 <li th:classappend="${activePage == 'home'} ? 'active'"><a href="/home">Home</a></li>
                 <li th:classappend="${activePage == 'trend'} ? 'active'"><a href="/trend">Trends</a></li>
-                <li th:classappend="${activePage == 'achievements'} ? 'active'"><a href="/achievements">Trophy</a></li>
+                <li th:classappend="${activePage == 'goals'} ? 'active'"><a href="/goals">Goals</a></li>
                 <li th:classappend="${activePage == 'suggestions'} ? 'active'"><a href="/suggestions">Suggestions</a></li>
             </ul>
             <form th:action="@{/logout}" method="post" class="navbar-form navbar-right">
