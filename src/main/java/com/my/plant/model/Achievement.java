@@ -19,6 +19,7 @@ public class Achievement {
     private String goalName;
     private int targetExecutions;
     private LocalDate achievedDate;
+    private String goalStepId;
 
     public Achievement() {
     }
@@ -68,5 +69,13 @@ public class Achievement {
 
     public void setAchievedDate(LocalDate achievedDate) {
         this.achievedDate = achievedDate;
+    }
+
+    public String getGoalStepId() {
+        return goalStepId;
+    }
+
+    public void setGoalStepId(String goalStepId) {
+        this.goalStepId = goalStepId;
     }
 }

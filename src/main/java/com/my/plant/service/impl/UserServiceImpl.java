@@ -2,6 +2,8 @@ package com.my.plant.service.impl;
 
 import com.my.plant.model.Achievement;
 import com.my.plant.model.Block;
+import com.my.plant.model.Goal;
+import com.my.plant.model.GoalStep;
 import com.my.plant.model.HistoryItem;
 import com.my.plant.model.User;
 import com.my.plant.service.UserService;
@@ -61,6 +63,10 @@ public class UserServiceImpl implements UserService {
         mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), HistoryItem.class);
         // Delete all achievements belonging to this user
         mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), Achievement.class);
+        // Delete all goal steps belonging to this user
+        mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), GoalStep.class);
+        // Delete all goals belonging to this user
+        mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), Goal.class);
         // Delete the user record
         mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), User.class);
     }

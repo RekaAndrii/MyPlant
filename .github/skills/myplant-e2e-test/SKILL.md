@@ -53,7 +53,8 @@ Or with an optional custom base URL:
 | **EXECUTE** | `GET /block/execute?name=E2ETestBlock` | `{hasError:false, message:"ok"}` |
 | **VERIFY BLOCK** | `GET /block/all`, find test block with `lastExecution` set | Block present with non-null execution date |
 | **TRENDS** | `GET /trend/countPerDay` returns valid trend data | `TrendDto.data` and `yValues` array non-empty |
-| **CLEANUP** | `DELETE /user/me` — deletes user + all blocks + all history (cascade) | `{hasError:false, message:"ok"}` |
+| **GOALS (G1–G14)** | Create goal → load page (extract goalId) → add 2 steps (one linked to challenge block) → verify steps → toggle step done → move step up → edit step → toggle goal done → rename goal → verify state → delete step → delete goal (cascade) → verify page empty | `{hasError:false}` on all mutations; HTML assertions on page loads |
+| **CLEANUP** | `DELETE /user/me` — deletes user + all blocks + all history + goals + goal steps (cascade) | `{hasError:false, message:"ok"}` |
 | **STOP APP** | Terminate the background app job and any Java processes | Process exits cleanly |
 
 ## Sample Report Output
@@ -202,6 +203,22 @@ Write-Host "All 5 runs passed!" -ForegroundColor Green
     cd MyPlant
     .\.github\skills\myplant-e2e-test\e2e-test.ps1
 ```
+
+## Workflow Rule: Modify → Run
+
+**Whenever you modify `e2e-test.ps1`, you must run the tests immediately after and confirm OVERALL: PASS before considering the task done.**
+
+Steps:
+1. Make the change to `e2e-test.ps1`
+2. Run the script:
+   ```powershell
+   cd C:\Users\AndriiReka\local-github\MyPlant
+   .\.github\skills\myplant-e2e-test\e2e-test.ps1
+   ```
+3. Check the final report — if OVERALL: FAIL, fix the failing phases and re-run until PASS.
+4. Only then report the task as complete to the user.
+
+Do not skip this step. A modified but untested e2e script is considered incomplete work.
 
 ## Notes
 

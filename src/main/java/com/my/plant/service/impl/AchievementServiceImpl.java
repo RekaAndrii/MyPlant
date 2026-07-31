@@ -32,4 +32,18 @@ public class AchievementServiceImpl implements AchievementService {
         query.with(Sort.by(Sort.Direction.DESC, "achievedDate"));
         return mongoTemplate.find(query, Achievement.class);
     }
+
+    @Override
+    public List<Achievement> getUnlinked(String userName) {
+        Query query = new Query();
+        query.addCriteria(new org.springframework.data.mongodb.core.query.Criteria().andOperator(
+                Criteria.where("userName").is(userName),
+                new org.springframework.data.mongodb.core.query.Criteria().orOperator(
+                        Criteria.where("goalStepId").exists(false),
+                        Criteria.where("goalStepId").is(null)
+                )
+        ));
+        query.with(Sort.by(Sort.Direction.DESC, "achievedDate"));
+        return mongoTemplate.find(query, Achievement.class);
+    }
 }

@@ -12,4 +12,6 @@ public interface AchievementService {
     void save(Achievement achievement);
 
     List<Achievement> getAll(String userName);
+
+    List<Achievement> getUnlinked(String userName);
 }

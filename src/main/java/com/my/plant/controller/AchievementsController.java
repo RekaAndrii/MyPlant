@@ -29,15 +29,7 @@ public class AchievementsController {
 
     @GetMapping("")
     public ModelAndView getAchievementsPage(ModelAndView model) {
-        List<Achievement> achievements = null;
-        try {
-            achievements = achievementService.getAll(UserUtil.getLogginedUserName());
-        } catch (Exception ex) {
-            LOGGER.error("Failed to load achievements", ex);
-            model.addObject("errorMessage", "Unable to load achievements. Please try again.");
-        }
-        model.addObject("achievements", achievements);
-        model.setViewName("achievements");
+        model.setViewName("redirect:/goals");
         return model;
     }
 

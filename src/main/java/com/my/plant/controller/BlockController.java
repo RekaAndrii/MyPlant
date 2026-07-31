@@ -6,6 +6,7 @@ import com.my.plant.model.HistoryAction;
 import com.my.plant.model.HistoryItem;
 import com.my.plant.service.AchievementService;
 import com.my.plant.service.BlockService;
+import com.my.plant.service.GoalStepService;
 import com.my.plant.service.HistoryService;
 import com.my.plant.util.UserUtil;
 import com.my.plant.util.dto.AjaxResponse;
@@ -38,6 +39,9 @@ public class BlockController {
     @Autowired
     private AchievementService achievementService;
 
+    @Autowired
+    private GoalStepService goalStepService;
+
     @RequestMapping(value = "/execute", method = RequestMethod.GET)
     @Operation(summary = "executeBlock", operationId = "executeBlock")
     public @ResponseBody ExecuteBlockResponse executeBlock(@RequestParam(value = "name", required = false) String name) {
@@ -59,6 +63,7 @@ public class BlockController {
                             block.getTargetExecutions(),
                             LocalDateTime.now().minusHours(3).toLocalDate()
                     ));
+                    goalStepService.markDoneByBlockName(block.getName(), userName);
                 }
                 block.setRemainingExecutions(remaining);
             }
