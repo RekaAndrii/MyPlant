@@ -1,6 +1,7 @@
 package com.my.plant.service.impl;
 
 import com.my.plant.model.User;
+import com.my.plant.model.PomodoroSession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -73,5 +74,12 @@ public class UserServiceImplTest {
 
         assertEquals("An account with this email already exists.", ex.getMessage());
         verify(mongoTemplate, never()).save(any(User.class));
+    }
+
+    @Test
+    public void deleteCurrentUser_removesPomodoroSessions() {
+        userService.deleteCurrentUser("alice");
+
+        verify(mongoTemplate).remove(any(Query.class), eq(PomodoroSession.class));
     }
 }

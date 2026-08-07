@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Pomodoro Timer - My Plant</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" th:href="@{/style/bootstrap.css}" href="../../style/bootstrap.css" />
+    <link rel="stylesheet" th:href="@{/style/blocks.css}" href="../../style/blocks.css" />
+
+    <script th:src="@{/js/jquery-3.2.1.min.js}" src="../../js/jquery-3.2.1.min.js"></script>
+    <script th:src="@{/js/app.js}" src="../../js/app.js"></script>
+    <script th:src="@{/js/pomodoro.js}" src="../../js/pomodoro.js"></script>
+</head>
+<body>
+
+<nav th:replace="~{fragments/navbar :: navbar('pomodoro')}"></nav>
+
+<div class="container page-content pomodoro-page">
+    <div class="pomodoro-card">
+        <h2 class="pomodoro-title">Pomodoro Timer</h2>
+        <div id="pomodoroPhase" class="pomodoro-phase">Ready to focus</div>
+        <div class="pomodoro-progress-track">
+            <div id="pomodoroProgress" class="pomodoro-progress"></div>
+        </div>
+        <div id="pomodoroClock" class="pomodoro-clock">25:00</div>
+        <p id="pomodoroHint" class="pomodoro-hint">Complete a 25-minute focus session, then take a 5-minute break.</p>
+        <div class="pomodoro-actions">
+            <button id="startFocusBtn" class="btn btn-primary" type="button">Start focus</button>
+            <button id="cancelFocusBtn" class="btn btn-default" type="button" style="display:none;">Cancel focus</button>
+            <button id="pauseFocusBtn" class="btn btn-default" type="button" style="display:none;">Pause</button>
+            <button id="resumeFocusBtn" class="btn btn-default" type="button" style="display:none;">Resume</button>
+            <button id="startBreakBtn" class="btn btn-info" type="button" style="display:none;">Start break</button>
+            <button id="endBreakBtn" class="btn btn-default" type="button" style="display:none;">End break</button>
+        </div>
+    </div>
+
+    <section class="pomodoro-history">
+        <h3>Recent focus sessions</h3>
+        <div id="pomodoroHistoryEmpty" class="pomodoro-empty">No focus sessions recorded yet.</div>
+        <div id="pomodoroHistoryToday" class="pomodoro-history-group" style="display:none;">
+            <h4>Today</h4>
+            <div id="pomodoroHistoryTodayItems"></div>
+        </div>
+        <div id="pomodoroHistoryOlder" class="pomodoro-history-group" style="display:none;">
+            <h4>Previous sessions</h4>
+            <div id="pomodoroHistoryOlderItems"></div>
+        </div>
+    </section>
+</div>
+
+<div id="pomodoroTagModal" class="add-block-modal-overlay" style="display:none;">
+    <div class="add-block-modal-dialog pomodoro-tag-dialog">
+        <h4 class="modal-title">Edit session tags</h4>
+        <input id="pomodoroTagSessionId" type="hidden" />
+
+        <label class="goals-form-label">Goal steps</label>
+        <div id="pomodoroTagGoalSteps" class="step-block-pills"></div>
+
+        <label class="goals-form-label">Routine blocks</label>
+        <div id="pomodoroTagBlocks" class="step-block-pills"></div>
+
+        <div class="pomodoro-tag-actions">
+            <button id="pomodoroSaveTagsBtn" class="btn btn-primary" type="button">Save tags</button>
+            <button id="pomodoroCancelTagsBtn" class="btn btn-default" type="button">Cancel</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
