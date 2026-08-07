@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,5 +29,29 @@ public class PomodoroSessionServiceImpl implements PomodoroSessionService {
         query.addCriteria(Criteria.where("userName").is(userName));
         query.with(Sort.by(Sort.Direction.DESC, "endedAt"));
         return mongoTemplate.find(query, PomodoroSession.class);
+    }
+
+    @Override
+    public void delete(String id, String userName) {
+        Query query = new Query();
+        query.addCriteria(new Criteria().andOperator(
+                Criteria.where("_id").is(id),
+                Criteria.where("userName").is(userName)
+        ));
+        mongoTemplate.remove(query, PomodoroSession.class);
+    }
+
+    @Override
+    public void updateTags(String id, String userName, List<String> goalStepIds, List<String> blockNames) {
+        Query query = new Query();
+        query.addCriteria(new Criteria().andOperator(
+                Criteria.where("_id").is(id),
+                Criteria.where("userName").is(userName)
+        ));
+
+        Update update = new Update();
+        update.set("goalStepIds", goalStepIds);
+        update.set("blockNames", blockNames);
+        mongoTemplate.updateFirst(query, update, PomodoroSession.class);
     }
 }

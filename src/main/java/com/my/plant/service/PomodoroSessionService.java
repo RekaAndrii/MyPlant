@@ -9,4 +9,8 @@ public interface PomodoroSessionService {
     void save(PomodoroSession session);
 
     List<PomodoroSession> getAll(String userName);
+
+    void delete(String id, String userName);
+
+    void updateTags(String id, String userName, List<String> goalStepIds, List<String> blockNames);
 }

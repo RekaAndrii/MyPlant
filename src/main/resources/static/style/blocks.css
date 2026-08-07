@@ -364,6 +364,30 @@
     color: #aaa;
 }
 
+.pomodoro-progress-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 6px;
+    background: #1f1f1f;
+    border: 1px solid #444;
+    margin-top: 14px;
+    overflow: hidden;
+}
+
+.pomodoro-progress {
+    height: 100%;
+    width: 0;
+    transition: width 0.8s linear;
+}
+
+.pomodoro-progress.focus {
+    background: #d9534f;
+}
+
+.pomodoro-progress.break {
+    background: #5bc0de;
+}
+
 .pomodoro-actions {
     margin-top: 20px;
 }
@@ -377,12 +401,29 @@
     margin-top: 0;
 }
 
+.pomodoro-history-group {
+    margin-top: 12px;
+}
+
+.pomodoro-history-group h4 {
+    color: #999;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 12px;
+}
+
 .pomodoro-history-item {
-    display: flex;
-    align-items: center;
+    display: block;
     border-top: 1px solid #3d3d3d;
     color: #ccc;
-    padding: 10px 0;
+    padding: 10px 0 12px;
+}
+
+.pomodoro-history-main {
+    display: flex;
+    align-items: center;
     gap: 12px;
 }
 
@@ -413,6 +454,51 @@
     font-size: 12px;
     margin-left: auto;
     text-align: right;
+}
+
+.pomodoro-history-actions {
+    margin-top: 8px;
+}
+
+.pomodoro-history-actions .btn + .btn {
+    margin-left: 8px;
+}
+
+.pomodoro-history-tags {
+    margin-top: 8px;
+}
+
+.pomodoro-tag-pill {
+    display: inline-block;
+    margin-right: 8px;
+    margin-bottom: 6px;
+    background: #3c4d2a;
+    color: #d3e6af;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 11px;
+}
+
+.pomodoro-tag-pill.block {
+    background: #3a3a55;
+    color: #c5d8ff;
+}
+
+.pomodoro-empty-tag {
+    color: #777;
+    font-size: 12px;
+}
+
+.pomodoro-tag-dialog {
+    max-width: 640px;
+}
+
+.pomodoro-tag-actions {
+    margin-top: 16px;
+}
+
+.pomodoro-tag-actions .btn + .btn {
+    margin-left: 8px;
 }
 
 .modal-title {

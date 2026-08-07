@@ -1,10 +1,13 @@
 package com.my.plant.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Document(collection = "pomodoroSession")
 public class PomodoroSession {
@@ -17,6 +20,8 @@ public class PomodoroSession {
     private LocalDateTime endedAt;
     private long elapsedSeconds;
     private boolean cancelled;
+    private List<String> goalStepIds;
+    private List<String> blockNames;
 
     public PomodoroSession() {
     }
@@ -28,6 +33,13 @@ public class PomodoroSession {
         this.endedAt = endedAt;
         this.elapsedSeconds = elapsedSeconds;
         this.cancelled = cancelled;
+        this.goalStepIds = new ArrayList<>();
+        this.blockNames = new ArrayList<>();
+    }
+
+    @JsonProperty("id")
+    public String getId() {
+        return _id;
     }
 
     public String getUserName() {
@@ -68,5 +80,21 @@ public class PomodoroSession {
 
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
+    }
+
+    public List<String> getGoalStepIds() {
+        return goalStepIds;
+    }
+
+    public void setGoalStepIds(List<String> goalStepIds) {
+        this.goalStepIds = goalStepIds;
+    }
+
+    public List<String> getBlockNames() {
+        return blockNames;
+    }
+
+    public void setBlockNames(List<String> blockNames) {
+        this.blockNames = blockNames;
     }
 }
