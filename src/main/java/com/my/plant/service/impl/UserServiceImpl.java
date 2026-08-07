@@ -5,6 +5,7 @@ import com.my.plant.model.Block;
 import com.my.plant.model.Goal;
 import com.my.plant.model.GoalStep;
 import com.my.plant.model.HistoryItem;
+import com.my.plant.model.PomodoroSession;
 import com.my.plant.model.User;
 import com.my.plant.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,8 @@ public class UserServiceImpl implements UserService {
         mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), GoalStep.class);
         // Delete all goals belonging to this user
         mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), Goal.class);
+        // Delete all Pomodoro sessions belonging to this user
+        mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), PomodoroSession.class);
         // Delete the user record
         mongoTemplate.remove(new Query(Criteria.where("userName").is(userName)), User.class);
     }
