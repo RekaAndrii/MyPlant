@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Pomodoro Timer - My Plant</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" th:href="@{/style/bootstrap.css}" href="../../style/bootstrap.css" />
+    <link rel="stylesheet" th:href="@{/style/blocks.css}" href="../../style/blocks.css" />
+
+    <script th:src="@{/js/jquery-3.2.1.min.js}" src="../../js/jquery-3.2.1.min.js"></script>
+    <script th:src="@{/js/app.js}" src="../../js/app.js"></script>
+    <script th:src="@{/js/pomodoro.js}" src="../../js/pomodoro.js"></script>
+</head>
+<body>
+
+<nav th:replace="~{fragments/navbar :: navbar('pomodoro')}"></nav>
+
+<div class="container page-content pomodoro-page">
+    <div class="pomodoro-card">
+        <h2 class="pomodoro-title">Pomodoro Timer</h2>
+        <div id="pomodoroPhase" class="pomodoro-phase">Ready to focus</div>
+        <div id="pomodoroClock" class="pomodoro-clock">25:00</div>
+        <p id="pomodoroHint" class="pomodoro-hint">Complete a 25-minute focus session, then take a 5-minute break.</p>
+        <div class="pomodoro-actions">
+            <button id="startFocusBtn" class="btn btn-primary" type="button">Start focus</button>
+            <button id="cancelFocusBtn" class="btn btn-default" type="button" style="display:none;">Cancel focus</button>
+            <button id="endBreakBtn" class="btn btn-default" type="button" style="display:none;">End break</button>
+        </div>
+    </div>
+
+    <section class="pomodoro-history">
+        <h3>Recent focus sessions</h3>
+        <div id="pomodoroHistoryEmpty" class="pomodoro-empty">No focus sessions recorded yet.</div>
+        <div id="pomodoroHistory"></div>
+    </section>
+</div>
+
+</body>
+</html>
