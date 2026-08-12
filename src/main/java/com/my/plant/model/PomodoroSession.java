@@ -19,6 +19,7 @@ public class PomodoroSession {
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
     private long elapsedSeconds;
+    private long plannedSeconds;
     private boolean cancelled;
     private List<String> goalStepIds;
     private List<String> blockNames;
@@ -27,11 +28,12 @@ public class PomodoroSession {
     }
 
     public PomodoroSession(String userName, LocalDateTime startedAt, LocalDateTime endedAt,
-                           long elapsedSeconds, boolean cancelled) {
+                           long elapsedSeconds, long plannedSeconds, boolean cancelled) {
         this.userName = userName;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
         this.elapsedSeconds = elapsedSeconds;
+        this.plannedSeconds = plannedSeconds;
         this.cancelled = cancelled;
         this.goalStepIds = new ArrayList<>();
         this.blockNames = new ArrayList<>();
@@ -72,6 +74,14 @@ public class PomodoroSession {
 
     public void setElapsedSeconds(long elapsedSeconds) {
         this.elapsedSeconds = elapsedSeconds;
+    }
+
+    public long getPlannedSeconds() {
+        return plannedSeconds;
+    }
+
+    public void setPlannedSeconds(long plannedSeconds) {
+        this.plannedSeconds = plannedSeconds;
     }
 
     public boolean isCancelled() {

@@ -19,7 +19,27 @@
 <div class="container page-content pomodoro-page">
     <div class="pomodoro-card">
         <h2 class="pomodoro-title">Pomodoro Timer</h2>
-        <div id="pomodoroPhase" class="pomodoro-phase">Ready to focus</div>
+
+        <div id="pomodoroPresets" class="pomodoro-presets">
+            <button class="pomodoro-preset" type="button" data-focus="15" data-break="3">15 / 3</button>
+            <button class="pomodoro-preset" type="button" data-focus="25" data-break="5">25 / 5</button>
+            <button class="pomodoro-preset" type="button" data-focus="50" data-break="10">50 / 10</button>
+        </div>
+
+        <div id="pomodoroPreTag" class="pomodoro-pretag">
+            <button id="pomodoroPreTagToggle" class="pomodoro-pretag-toggle" type="button">
+                Working on&hellip; <span id="pomodoroPreTagCount"></span>
+            </button>
+            <div id="pomodoroPreTagPanel" class="pomodoro-pretag-panel" style="display:none;">
+                <label class="goals-form-label">Goal steps</label>
+                <div id="pomodoroPreTagGoalSteps" class="step-block-pills"></div>
+                <label class="goals-form-label">Routine blocks</label>
+                <div id="pomodoroPreTagBlocks" class="step-block-pills"></div>
+            </div>
+            <div id="pomodoroPreTagSummary" class="pomodoro-pretag-summary"></div>
+        </div>
+
+        <div id="pomodoroPhase" class="pomodoro-phase idle">Ready to focus</div>
         <div class="pomodoro-progress-track">
             <div id="pomodoroProgress" class="pomodoro-progress"></div>
         </div>
@@ -32,6 +52,7 @@
             <button id="resumeFocusBtn" class="btn btn-default" type="button" style="display:none;">Resume</button>
             <button id="startBreakBtn" class="btn btn-info" type="button" style="display:none;">Start break</button>
             <button id="endBreakBtn" class="btn btn-default" type="button" style="display:none;">End break</button>
+            <button id="pomodoroMuteBtn" class="btn btn-default pomodoro-mute-btn" type="button" title="Toggle sound alert">&#128266;</button>
         </div>
     </div>
 
@@ -40,10 +61,13 @@
         <div id="pomodoroHistoryEmpty" class="pomodoro-empty">No focus sessions recorded yet.</div>
         <div id="pomodoroHistoryToday" class="pomodoro-history-group" style="display:none;">
             <h4>Today</h4>
+            <div id="pomodoroTodaySummary" class="pomodoro-today-summary"></div>
             <div id="pomodoroHistoryTodayItems"></div>
         </div>
+        <button id="pomodoroHistoryToggle" class="pomodoro-history-toggle" type="button" style="display:none;">
+            <span class="caret-icon">&#9656;</span><span id="pomodoroHistoryToggleLabel">Show previous sessions</span>
+        </button>
         <div id="pomodoroHistoryOlder" class="pomodoro-history-group" style="display:none;">
-            <h4>Previous sessions</h4>
             <div id="pomodoroHistoryOlderItems"></div>
         </div>
     </section>

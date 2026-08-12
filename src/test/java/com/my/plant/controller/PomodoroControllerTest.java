@@ -91,6 +91,7 @@ public class PomodoroControllerTest {
         PomodoroSession saved = sessionCaptor.getValue();
         assertEquals("alice", saved.getUserName());
         assertEquals(1500, saved.getElapsedSeconds());
+        assertEquals(1500, saved.getPlannedSeconds());
         assertFalse(saved.isCancelled());
     }
 
@@ -123,6 +124,74 @@ public class PomodoroControllerTest {
 
         assertTrue(response.isHasError());
         verify(pomodoroSessionService, never()).save(org.mockito.ArgumentMatchers.any(PomodoroSession.class));
+    }
+
+    @Test
+    public void saveSession_acceptsCompletedSessionForFiftyMinutePreset() {
+        PomodoroSessionRequest request = request(
+                "2026-08-07T08:00:00Z",
+                "2026-08-07T08:50:00Z",
+                false
+        );
+        request.setPlannedSeconds(50 * 60);
+
+        AjaxResponse response = pomodoroController.saveSession(request);
+
+        assertFalse(response.isHasError());
+        ArgumentCaptor<PomodoroSession> sessionCaptor = ArgumentCaptor.forClass(PomodoroSession.class);
+        verify(pomodoroSessionService).save(sessionCaptor.capture());
+        assertEquals(3000, sessionCaptor.getValue().getElapsedSeconds());
+        assertEquals(3000, sessionCaptor.getValue().getPlannedSeconds());
+    }
+
+    @Test
+    public void saveSession_rejectsUnknownDurationPreset() {
+        PomodoroSessionRequest request = request(
+                "2026-08-07T08:00:00Z",
+                "2026-08-07T08:10:00Z",
+                false
+        );
+        request.setPlannedSeconds(10 * 60);
+
+        AjaxResponse response = pomodoroController.saveSession(request);
+
+        assertTrue(response.isHasError());
+        verify(pomodoroSessionService, never()).save(org.mockito.ArgumentMatchers.any(PomodoroSession.class));
+    }
+
+    @Test
+    public void saveSession_defaultsToTwentyFiveMinutesWhenPlannedSecondsAbsent() {
+        PomodoroSessionRequest request = request(
+                "2026-08-07T08:00:00Z",
+                "2026-08-07T08:25:00Z",
+                false
+        );
+
+        AjaxResponse response = pomodoroController.saveSession(request);
+
+        assertFalse(response.isHasError());
+        ArgumentCaptor<PomodoroSession> sessionCaptor = ArgumentCaptor.forClass(PomodoroSession.class);
+        verify(pomodoroSessionService).save(sessionCaptor.capture());
+        assertEquals(1500, sessionCaptor.getValue().getPlannedSeconds());
+    }
+
+    @Test
+    public void saveSession_persistsPreSelectedTags() {
+        PomodoroSessionRequest request = request(
+                "2026-08-07T08:00:00Z",
+                "2026-08-07T08:25:00Z",
+                false
+        );
+        request.setGoalStepIds(Arrays.asList("step-1", "step-1"));
+        request.setBlockNames(Arrays.asList("Morning", ""));
+
+        AjaxResponse response = pomodoroController.saveSession(request);
+
+        assertFalse(response.isHasError());
+        ArgumentCaptor<PomodoroSession> sessionCaptor = ArgumentCaptor.forClass(PomodoroSession.class);
+        verify(pomodoroSessionService).save(sessionCaptor.capture());
+        assertEquals(Arrays.asList("step-1"), sessionCaptor.getValue().getGoalStepIds());
+        assertEquals(Arrays.asList("Morning"), sessionCaptor.getValue().getBlockNames());
     }
 
     @Test

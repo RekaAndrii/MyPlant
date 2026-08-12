@@ -37,6 +37,7 @@ public class PomodoroSessionServiceImplTest {
                 LocalDateTime.of(2026, 8, 7, 10, 0),
                 LocalDateTime.of(2026, 8, 7, 10, 25),
                 1500,
+                1500,
                 false
         );
 
