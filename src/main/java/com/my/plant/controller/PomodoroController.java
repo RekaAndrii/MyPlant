@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +39,12 @@ import java.util.Set;
 @RequestMapping("/pomodoro")
 public class PomodoroController {
 
-    private static final long FOCUS_DURATION_SECONDS = 25 * 60;
+    private static final long DEFAULT_FOCUS_DURATION_SECONDS = 25 * 60;
+    private static final Set<Long> VALID_FOCUS_DURATIONS_SECONDS = new LinkedHashSet<>(Arrays.asList(
+            15 * 60L,
+            25 * 60L,
+            50 * 60L
+    ));
 
     @Autowired
     private PomodoroSessionService pomodoroSessionService;
@@ -69,20 +75,31 @@ public class PomodoroController {
             return new AjaxResponse(true, "Focus session start and end times are required.");
         }
 
+        long plannedSeconds = request.getPlannedSeconds() > 0
+                ? request.getPlannedSeconds()
+                : DEFAULT_FOCUS_DURATION_SECONDS;
+        if (!VALID_FOCUS_DURATIONS_SECONDS.contains(plannedSeconds)) {
+            return new AjaxResponse(true, "Invalid focus session duration preset.");
+        }
+
         long elapsedSeconds = Duration.between(request.getStartedAt(), request.getEndedAt()).getSeconds();
-        if (!isValidDuration(elapsedSeconds, request.isCancelled())) {
+        if (!isValidDuration(elapsedSeconds, plannedSeconds, request.isCancelled())) {
             return new AjaxResponse(true, "Invalid focus session duration.");
         }
 
         LocalDateTime startedAt = LocalDateTime.ofInstant(request.getStartedAt(), ZoneId.systemDefault());
         LocalDateTime endedAt = LocalDateTime.ofInstant(request.getEndedAt(), ZoneId.systemDefault());
-        pomodoroSessionService.save(new PomodoroSession(
+        PomodoroSession session = new PomodoroSession(
                 UserUtil.getLogginedUserName(),
                 startedAt,
                 endedAt,
                 elapsedSeconds,
+                plannedSeconds,
                 request.isCancelled()
-        ));
+        );
+        session.setGoalStepIds(uniqueNonEmpty(request.safeGoalStepIds()));
+        session.setBlockNames(uniqueNonEmpty(request.safeBlockNames()));
+        pomodoroSessionService.save(session);
         return new AjaxResponse(false, "ok");
     }
 
@@ -136,11 +153,11 @@ public class PomodoroController {
         return new PomodoroTagOptionsResponse(goalStepOptions, blockNames);
     }
 
-    private boolean isValidDuration(long elapsedSeconds, boolean cancelled) {
+    private boolean isValidDuration(long elapsedSeconds, long plannedSeconds, boolean cancelled) {
         if (cancelled) {
-            return elapsedSeconds >= 0 && elapsedSeconds < FOCUS_DURATION_SECONDS;
+            return elapsedSeconds >= 0 && elapsedSeconds < plannedSeconds;
         }
-        return elapsedSeconds == FOCUS_DURATION_SECONDS;
+        return elapsedSeconds == plannedSeconds;
     }
 
     private List<String> uniqueNonEmpty(List<String> values) {

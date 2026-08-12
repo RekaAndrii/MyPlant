@@ -345,10 +345,27 @@
 }
 
 .pomodoro-phase {
-    color: #9ec860;
+    color: #888;
     font-size: 16px;
     text-transform: uppercase;
     letter-spacing: 1px;
+    transition: color 0.2s;
+}
+
+.pomodoro-phase.focus {
+    color: #9ec860;
+}
+
+.pomodoro-phase.break {
+    color: #d8d36a;
+}
+
+.pomodoro-phase.paused {
+    color: #aaa;
+}
+
+.pomodoro-phase.idle {
+    color: #888;
 }
 
 .pomodoro-clock {
@@ -357,6 +374,11 @@
     font-weight: bold;
     line-height: 1.2;
     margin: 12px 0;
+    transition: color 0.2s, opacity 0.2s;
+}
+
+.pomodoro-clock.paused {
+    opacity: 0.55;
 }
 
 .pomodoro-hint,
@@ -377,15 +399,19 @@
 .pomodoro-progress {
     height: 100%;
     width: 0;
-    transition: width 0.8s linear;
+    transition: width 0.8s linear, background 0.2s;
 }
 
 .pomodoro-progress.focus {
-    background: #d9534f;
+    background: #648637;
 }
 
 .pomodoro-progress.break {
-    background: #5bc0de;
+    background: #a9a534;
+}
+
+.pomodoro-progress.paused {
+    background: #6a6a6a;
 }
 
 .pomodoro-actions {
@@ -394,6 +420,86 @@
 
 .pomodoro-actions .btn + .btn {
     margin-left: 8px;
+}
+
+.pomodoro-mute-btn {
+    opacity: 0.7;
+}
+
+.pomodoro-mute-btn.muted {
+    opacity: 0.4;
+}
+
+/* ---- Duration presets ---- */
+
+.pomodoro-presets {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.pomodoro-preset {
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 3px;
+    color: #ccc;
+    font-size: 12px;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.pomodoro-preset:hover {
+    background: #444;
+    color: #fff;
+}
+
+.pomodoro-preset.active {
+    background: #648637;
+    border-color: #7aa347;
+    color: #fff;
+}
+
+.pomodoro-preset:disabled,
+.pomodoro-preset[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* ---- Pre-session "working on" picker ---- */
+
+.pomodoro-pretag {
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.pomodoro-pretag-toggle {
+    background: none;
+    border: none;
+    color: #9ec860;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.pomodoro-pretag-toggle:hover {
+    color: #b6dd7d;
+}
+
+.pomodoro-pretag-panel {
+    margin-top: 10px;
+    background: #262626;
+    border: 1px solid #3d3d3d;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.pomodoro-pretag-summary {
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
 .pomodoro-history h3 {
@@ -414,11 +520,91 @@
     font-size: 12px;
 }
 
+/* ---- Today summary strip ---- */
+
+.pomodoro-today-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.pomodoro-summary-chip {
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 3px 10px;
+    font-size: 12px;
+    color: #ccc;
+}
+
+.pomodoro-summary-chip.completed {
+    color: #9ec860;
+    border-color: #4e7a2a;
+}
+
+.pomodoro-summary-chip.cancelled {
+    color: #e0b060;
+    border-color: #7a5a2a;
+}
+
+.pomodoro-summary-chip.time {
+    color: #eee;
+    font-weight: bold;
+}
+
+/* ---- Older sessions toggle + date grouping ---- */
+
+.pomodoro-history-toggle {
+    background: #333;
+    border: 1px solid #4a4a4a;
+    border-radius: 3px;
+    color: #ccc;
+    font-size: 12px;
+    padding: 6px 14px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    margin-top: 16px;
+}
+
+.pomodoro-history-toggle:hover {
+    background: #3a3a3a;
+    color: #fff;
+}
+
+.pomodoro-history-toggle .caret-icon {
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.15s;
+}
+
+.pomodoro-history-toggle.expanded .caret-icon {
+    transform: rotate(90deg);
+}
+
+.pomodoro-day-group {
+    margin-top: 10px;
+}
+
+.pomodoro-day-label {
+    color: #888;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.pomodoro-history-item.older {
+    opacity: 0.72;
+}
+
 .pomodoro-history-item {
     display: block;
     border-top: 1px solid #3d3d3d;
     color: #ccc;
     padding: 10px 0 12px;
+    position: relative;
 }
 
 .pomodoro-history-main {
@@ -487,6 +673,27 @@
 .pomodoro-empty-tag {
     color: #777;
     font-size: 12px;
+}
+
+.pomodoro-delete-confirm {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(30, 30, 30, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 5;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.pomodoro-delete-confirm .btn {
+    min-width: 50px;
 }
 
 .pomodoro-tag-dialog {
