@@ -40,66 +40,80 @@
     </div>
 
     <!-- Goals list -->
-    <div th:each="goal : ${goals}" class="goal-card" th:classappend="${goal.done} ? 'goal-done'" th:attr="data-goal-id=${goal.get_id()}">
-        <div class="goal-card-header">
-            <div class="goal-header-left">
-                <!-- Custom toggle switch for goal done state -->
-                <label class="goal-toggle" title="Mark goal done">
-                    <input type="checkbox" class="goal-done-check" th:checked="${goal.done}" />
-                    <span class="goal-toggle-track">
-                        <span class="goal-toggle-thumb"></span>
-                    </span>
-                </label>
-                <span class="goal-name" th:text="${goal.name}"></span>
-            </div>
-            <div class="goal-header-actions">
-                <button class="goal-edit-btn btn btn-xs btn-default" type="button" title="Rename goal">&#9998;</button>
-                <button class="goal-delete-btn btn btn-xs btn-danger" type="button" title="Delete goal">&#128465;</button>
-            </div>
-        </div>
-
-        <!-- Delete confirm overlay -->
-        <div class="goal-delete-confirm" style="display:none;">
-            <span>Delete goal and all its steps?</span>
-            <button class="confirm-goal-delete-yes btn btn-danger btn-sm" type="button">Yes</button>
-            <button class="confirm-goal-delete-no btn btn-default btn-sm" type="button">No</button>
-        </div>
-
-        <!-- Steps list -->
-        <div class="goal-steps-list">
-            <div th:each="step,iterStat : ${stepsByGoalId.get(goal.get_id())}"
-                 class="step-item"
-                 th:classappend="${step.done} ? 'step-done'"
-                 th:attr="data-step-id=${step.get_id()},data-step-order=${step.order},data-goal-id=${goal.get_id()}">
-                <!-- Custom toggle for step done -->
-                <label class="step-toggle" title="Mark step done">
-                    <input type="checkbox" class="step-done-check" th:checked="${step.done}" />
-                    <span class="step-toggle-track">
-                        <span class="step-toggle-thumb"></span>
-                    </span>
-                </label>
-                <span class="step-name" th:text="${step.name}"></span>
-                <span th:each="bn : ${step.linkedBlockNames}" class="block-badge" th:text="${bn}"></span>
-                <div class="step-actions">
-                    <button class="step-move-up btn btn-xs btn-default" type="button" title="Move up"
-                            th:disabled="${iterStat.first}">&#9650;</button>
-                    <button class="step-move-down btn btn-xs btn-default" type="button" title="Move down"
-                            th:disabled="${iterStat.last}">&#9660;</button>
-                    <button class="step-edit-btn btn btn-xs btn-default" type="button" title="Edit step"
-                            th:attr="data-step-name=${step.name},data-linked-blocks=${step.linkedBlockNames != null} ? ${#strings.listJoin(step.linkedBlockNames, ',')} : ''">&#9998;</button>
-                    <button class="step-delete-btn btn btn-xs btn-danger" type="button" title="Delete step">&#128465;</button>
+    <div id="goalsContainer">
+        <div th:each="goal : ${goals}" class="goal-card" th:classappend="${goal.done} ? 'goal-done'" th:attr="data-goal-id=${goal.get_id()}" draggable="false">
+            <div class="goal-card-header">
+                <div class="goal-header-left">
+                    <span class="goal-drag-handle" title="Drag to reorder">&#9776;</span>
+                    <!-- Custom toggle switch for goal done state -->
+                    <label class="goal-toggle" title="Mark goal done">
+                        <input type="checkbox" class="goal-done-check" th:checked="${goal.done}" />
+                        <span class="goal-toggle-track">
+                            <span class="goal-toggle-thumb"></span>
+                        </span>
+                    </label>
+                    <span class="goal-name" th:text="${goal.name}"></span>
+                </div>
+                <div class="goal-header-actions dropdown">
+                    <button class="btn btn-xs btn-link dropdown-toggle text-muted" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #999;">
+                        &#8942;
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" style="background-color: #333; border: 1px solid #444; min-width: 120px;">
+                        <li><a href="#" class="goal-edit-btn" style="color: #eee;">&#9998; Edit</a></li>
+                        <li><a href="#" class="goal-delete-btn" style="color: #ff4d4d;">&#128465; Delete</a></li>
+                    </ul>
                 </div>
             </div>
 
-            <!-- Empty steps state -->
-            <div class="step-empty-state"
-                 th:if="${stepsByGoalId.get(goal.get_id()) == null or #lists.isEmpty(stepsByGoalId.get(goal.get_id()))}">
-                <span class="text-muted" style="font-size:12px;">No steps yet.</span>
+            <!-- Delete confirm overlay -->
+            <div class="goal-delete-confirm" style="display:none;">
+                <span>Delete goal and all its steps?</span>
+                <button class="confirm-goal-delete-yes btn btn-danger btn-sm" type="button">Yes</button>
+                <button class="confirm-goal-delete-no btn btn-default btn-sm" type="button">No</button>
             </div>
-        </div>
 
-        <div class="goal-card-footer">
-            <button class="add-step-btn btn btn-xs btn-default" type="button" th:attr="data-goal-id=${goal.get_id()}">+ Add Step</button>
+            <!-- Steps list -->
+            <div class="goal-steps-list">
+                <div th:each="step,iterStat : ${stepsByGoalId.get(goal.get_id())}"
+                     class="step-item"
+                     th:classappend="${step.done} ? 'step-done'"
+                     th:attr="data-step-id=${step.get_id()},data-step-order=${step.order},data-goal-id=${goal.get_id()}">
+                    <!-- Custom toggle for step done -->
+                    <label class="step-toggle" title="Mark step done">
+                        <input type="checkbox" class="step-done-check" th:checked="${step.done}" />
+                        <span class="step-toggle-track">
+                            <span class="step-toggle-thumb"></span>
+                        </span>
+                    </label>
+                    <span class="step-name" th:text="${step.name}"></span>
+                    <span th:each="bn : ${step.linkedBlockNames}" class="block-badge" th:text="${bn}"></span>
+                    <div class="step-actions">
+                        <button class="step-move-up btn btn-xs btn-default" type="button" title="Move up"
+                                th:disabled="${iterStat.first}">&#8593;</button>
+                        <button class="step-move-down btn btn-xs btn-default" type="button" title="Move down"
+                                th:disabled="${iterStat.last}">&#8595;</button>
+                        <div class="dropdown" style="display:inline-block;">
+                            <button class="btn btn-xs btn-link dropdown-toggle text-muted" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #999;">
+                                &#8942;
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" style="background-color: #333; border: 1px solid #444; min-width: 120px; top: 100%; right: 0;">
+                                <li><a href="#" class="step-edit-btn" th:attr="data-step-name=${step.name},data-linked-blocks=${step.linkedBlockNames != null} ? ${#strings.listJoin(step.linkedBlockNames, ',')} : ''" style="color: #eee;">&#9998; Edit</a></li>
+                                <li><a href="#" class="step-delete-btn" style="color: #ff4d4d;">&#128465; Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty steps state -->
+                <div class="step-empty-state"
+                     th:if="${stepsByGoalId.get(goal.get_id()) == null or #lists.isEmpty(stepsByGoalId.get(goal.get_id()))}">
+                    <span class="text-muted" style="font-size:12px;">No steps yet.</span>
+                </div>
+            </div>
+
+            <div class="goal-card-footer">
+                <button class="add-step-btn btn btn-xs btn-default" type="button" th:attr="data-goal-id=${goal.get_id()}" title="Add Step" style="padding: 2px 12px; font-weight: bold; font-size: 14px;">&#43;</button>
+            </div>
         </div>
     </div>
 

@@ -1,14 +1,39 @@
 $(function () {
+    initDropdowns();
     initAddGoal();
     initEditGoal();
     initDeleteGoal();
     initGoalDoneToggle();
+    initGoalDragAndDrop();
     initAddStep();
     initEditStep();
     initDeleteStep();
     initStepDoneToggle();
     initStepMove();
 });
+
+// ── Dropdown Toggle ──────────────────────────────────────────────────────────
+
+function initDropdowns() {
+    $(document).on('click', '.dropdown-toggle', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $dropdown = $(this).parent();
+        var isExpanded = $dropdown.hasClass('open');
+        
+        // Close all other dropdowns
+        $('.dropdown').removeClass('open');
+        
+        if (!isExpanded) {
+            $dropdown.addClass('open');
+        }
+    });
+
+    // Close dropdowns when clicking outside
+    $(document).on('click', function () {
+        $('.dropdown').removeClass('open');
+    });
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -98,6 +123,7 @@ function resetEditGoalForm() {
 
 function initEditGoal() {
     $(document).on('click', '.goal-edit-btn', function (e) {
+        e.preventDefault();
         e.stopPropagation();
         var $card = $(this).closest('.goal-card');
         var goalId = $card.attr('data-goal-id');
@@ -146,6 +172,7 @@ function initEditGoal() {
 
 function initDeleteGoal() {
     $(document).on('click', '.goal-delete-btn', function (e) {
+        e.preventDefault();
         e.stopPropagation();
         var $card = $(this).closest('.goal-card');
         $card.find('.goal-delete-confirm').show();
@@ -190,6 +217,80 @@ function initGoalDoneToggle() {
                 }
             }
         });
+    });
+}
+
+// ── Goal Drag and Drop ───────────────────────────────────────────────────────
+
+function initGoalDragAndDrop() {
+    var dragSrcEl = null;
+
+    $(document).on('mousedown', '.goal-drag-handle', function() {
+        $(this).closest('.goal-card').attr('draggable', 'true');
+    }).on('mouseup mouseleave', function() {
+        $(this).closest('.goal-card').attr('draggable', 'false');
+    });
+
+    $(document).on('dragstart', '.goal-card', function (e) {
+        dragSrcEl = this;
+        e.originalEvent.dataTransfer.effectAllowed = 'move';
+        e.originalEvent.dataTransfer.setData('text/html', this.innerHTML);
+        $(this).addClass('dragging');
+    });
+
+    $(document).on('dragover', '.goal-card', function (e) {
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+        return false;
+    });
+
+    $(document).on('dragenter', '.goal-card', function (e) {
+        $(this).addClass('drag-over');
+    });
+
+    $(document).on('dragleave', '.goal-card', function (e) {
+        $(this).removeClass('drag-over');
+    });
+
+    $(document).on('drop', '.goal-card', function (e) {
+        if (e.stopPropagation) {
+            e.stopPropagation();
+        }
+        if (dragSrcEl !== this) {
+            var $this = $(this);
+            var $dragSrc = $(dragSrcEl);
+            
+            // Insert dragged before or after depending on relative position
+            if ($this.index() < $dragSrc.index()) {
+                $dragSrc.insertBefore($this);
+            } else {
+                $dragSrc.insertAfter($this);
+            }
+
+            // Save new order
+            var newOrder = [];
+            $('#goalsContainer .goal-card').each(function () {
+                newOrder.push($(this).attr('data-goal-id'));
+            });
+
+            $.ajax({
+                url: '/goals/reorder',
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify({ goalIds: newOrder }),
+                success: function () {
+                    // silently succeeded
+                }
+            });
+        }
+        return false;
+    });
+
+    $(document).on('dragend', '.goal-card', function (e) {
+        $(this).removeClass('dragging');
+        $('.goal-card').removeClass('drag-over');
     });
 }
 
@@ -256,6 +357,7 @@ function resetEditStepForm() {
 
 function initEditStep() {
     $(document).on('click', '.step-edit-btn', function (e) {
+        e.preventDefault();
         e.stopPropagation();
         var $step = $(this).closest('.step-item');
         var stepId = $step.attr('data-step-id');
@@ -308,6 +410,7 @@ function initEditStep() {
 
 function initDeleteStep() {
     $(document).on('click', '.step-delete-btn', function (e) {
+        e.preventDefault();
         e.stopPropagation();
         var $step = $(this).closest('.step-item');
         var stepId = $step.attr('data-step-id');

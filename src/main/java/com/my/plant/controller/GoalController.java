@@ -115,6 +115,17 @@ public class GoalController {
         return new AjaxResponse(false, AJAX_OK);
     }
 
+    @PutMapping("/reorder")
+    @ResponseBody
+    public AjaxResponse reorderGoals(@RequestBody Map<String, List<String>> body) {
+        String userName = UserUtil.getLogginedUserName();
+        List<String> goalIds = body.get("goalIds");
+        if (goalIds != null && !goalIds.isEmpty()) {
+            goalService.reorder(goalIds, userName);
+        }
+        return new AjaxResponse(false, AJAX_OK);
+    }
+
     // ── Step CRUD ─────────────────────────────────────────────────────────────
 
     @PostMapping("/{goalId}/steps")

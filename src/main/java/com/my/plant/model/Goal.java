@@ -19,6 +19,7 @@ public class Goal {
     private String name;
     private boolean done;
     private LocalDate createdDate;
+    private int order;
 
     public Goal() {
     }
@@ -68,5 +69,13 @@ public class Goal {
 
     public void setCreatedDate(LocalDate createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

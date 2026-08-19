@@ -25,7 +25,7 @@ public class GoalServiceImpl implements GoalService {
     public List<Goal> getAll(String userName) {
         Query query = new Query();
         query.addCriteria(Criteria.where("userName").is(userName));
-        query.with(Sort.by(Sort.Direction.ASC, "createdDate"));
+        query.with(Sort.by(Sort.Direction.ASC, "order", "createdDate"));
         return mongoTemplate.find(query, Goal.class);
     }
 
@@ -41,6 +41,13 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     public void save(Goal goal) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("userName").is(goal.getUserName()));
+        query.with(Sort.by(Sort.Direction.DESC, "order"));
+        query.limit(1);
+        List<Goal> existing = mongoTemplate.find(query, Goal.class);
+        int nextOrder = existing.isEmpty() ? 0 : existing.get(0).getOrder() + 1;
+        goal.setOrder(nextOrder);
         mongoTemplate.save(goal);
     }
 
@@ -72,5 +79,18 @@ public class GoalServiceImpl implements GoalService {
                 Criteria.where("userName").is(userName)
         ));
         mongoTemplate.remove(query, Goal.class);
+    }
+
+    @Override
+    public void reorder(List<String> goalIds, String userName) {
+        int order = 0;
+        for (String id : goalIds) {
+            Query query = new Query();
+            query.addCriteria(new Criteria().andOperator(
+                    Criteria.where("_id").is(id),
+                    Criteria.where("userName").is(userName)
+            ));
+            mongoTemplate.updateFirst(query, Update.update("order", order++), Goal.class);
+        }
     }
 }

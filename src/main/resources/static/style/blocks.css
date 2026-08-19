@@ -743,7 +743,22 @@
     border: 1px solid #444;
     border-radius: 6px;
     margin-bottom: 16px;
-    overflow: hidden;
+    overflow: visible;
+}
+
+.goal-drag-handle {
+    cursor: grab;
+    color: #666;
+    font-size: 16px;
+    margin-right: 4px;
+    user-select: none;
+}
+.goal-drag-handle:active {
+    cursor: grabbing;
+}
+.goal-card.dragging {
+    opacity: 0.5;
+    border: 1px dashed #999;
 }
 
 .goal-card-header {
@@ -753,6 +768,15 @@
     padding: 12px 16px;
     background: #333;
     border-bottom: 1px solid #444;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.dropdown-menu > li > a {
+    padding: 6px 20px;
+}
+.dropdown-menu > li > a:hover {
+    background-color: #444 !important;
 }
 
 .goal-header-left {
@@ -963,9 +987,12 @@
 /* ── Goal card footer (Add Step button) ── */
 
 .goal-card-footer {
-    padding: 8px 16px 12px 16px;
-    border-top: 1px solid #363636;
-    background: #292929;
+    padding: 8px 16px;
+    background: #333;
+    border-top: 1px solid #444;
+    text-align: left;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 
 /* ── Goals form label ── */

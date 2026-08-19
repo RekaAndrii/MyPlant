@@ -20,4 +20,6 @@ public interface GoalService {
     void markDone(String id, boolean done, String userName);
 
     void delete(String id, String userName);
+
+    void reorder(List<String> goalIds, String userName);
 }
