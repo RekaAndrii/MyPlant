@@ -35,6 +35,7 @@ function initPomodoroTimer() {
     $("#pauseFocusBtn").click(pauseFocus);
     $("#resumeFocusBtn").click(resumeFocus);
     $("#startBreakBtn").click(startBreak);
+    $("#skipBreakBtn").click(skipBreak);
     $("#endBreakBtn").click(endBreak);
     $("#pomodoroCancelTagsBtn").click(closePomodoroTagModal);
     $("#pomodoroSaveTagsBtn").click(saveSessionTags);
@@ -156,6 +157,11 @@ function startBreak() {
     startPomodoroTicking();
 }
 
+function skipBreak() {
+    clearBreakReady();
+    showPomodoroIdle();
+}
+
 function endBreak() {
     clearPomodoroState();
     clearBreakReady();
@@ -252,8 +258,8 @@ function showBreakReady() {
     setPhaseTint("break");
     $("#pomodoroPhase").text("Focus complete");
     $("#pomodoroClock").text("00:00");
-    $("#pomodoroHint").text("Start your break when you are ready.");
-    setPomodoroButtons({ startBreak: true });
+    $("#pomodoroHint").text("Start your break when you are ready, or skip it to start another focus session.");
+    setPomodoroButtons({ startBreak: true, skipBreak: true });
     setPresetControlsEnabled(true);
     setProgress("focus", 0);
     updateDocumentTitle("break-ready", 0);
@@ -304,6 +310,7 @@ function setPomodoroButtons(visible) {
         pause: "#pauseFocusBtn",
         resume: "#resumeFocusBtn",
         startBreak: "#startBreakBtn",
+        skipBreak: "#skipBreakBtn",
         endBreak: "#endBreakBtn"
     };
     $.each(buttons, function(key, selector) {
