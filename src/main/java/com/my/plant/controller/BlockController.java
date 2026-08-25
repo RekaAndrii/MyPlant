@@ -47,7 +47,7 @@ public class BlockController {
     public @ResponseBody ExecuteBlockResponse executeBlock(@RequestParam(value = "name", required = false) String name) {
         String userName = UserUtil.getLogginedUserName();
         Block block = blockService.findByName(name, userName);
-        if (block != null) {
+        if (block != null && !block.isDisabled()) {
             block.setLastExecution(LocalDateTime.now().minusHours(3).toLocalDate());
 
             boolean completed = false;
@@ -108,6 +108,14 @@ public class BlockController {
     @DeleteMapping(value = "/{name}")
     public @ResponseBody AjaxResponse delete(@PathVariable(name = "name") String blockName) {
         blockService.remove(blockName, UserUtil.getLogginedUserName());
+        return new AjaxResponse(false, AJAX_OK_MESSAGE);
+    }
+
+    @PutMapping(value = "/{name}/disabled")
+    @Operation(summary = "setBlockDisabled", operationId = "setBlockDisabled")
+    public @ResponseBody AjaxResponse setDisabled(@PathVariable(name = "name") String blockName,
+                                                   @RequestParam(name = "disabled") boolean disabled) {
+        blockService.updateDisabled(blockName, disabled, UserUtil.getLogginedUserName());
         return new AjaxResponse(false, AJAX_OK_MESSAGE);
     }
 }
