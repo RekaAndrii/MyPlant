@@ -55,8 +55,10 @@
         </div>
         <div class="block-row col-xs-12 row">
             <div th:each="bl : ${blocks}" class="col-xs-4 block-col">
-                <div class="block-item hoverable" th:classappend="${bl.color.value}" th:attr="data-block-name=${bl.name},data-scheduled-days=${bl.scheduledDays != null} ? ${#strings.listJoin(bl.scheduledDays, ',')} : ''">
+                <div class="block-item hoverable" th:classappend="${bl.disabled} ? (${bl.color.value} + ' disabled-block') : ${bl.color.value}" th:attr="data-block-name=${bl.name},data-scheduled-days=${bl.scheduledDays != null} ? ${#strings.listJoin(bl.scheduledDays, ',')} : '',data-disabled=${bl.disabled}">
                     <div class="block-edit-icons" style="display:none;">
+                        <button class="edit-disable-btn" type="button" th:if="${!bl.disabled}" title="Disable">&#9208;</button>
+                        <button class="edit-disable-btn" type="button" th:if="${bl.disabled}" title="Enable">&#9654;</button>
                         <button class="edit-pencil-btn" type="button" title="Edit">&#9998;</button>
                         <button class="edit-trash-btn" type="button" title="Delete">&#128465;</button>
                     </div>

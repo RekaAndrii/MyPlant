@@ -33,6 +33,15 @@
 .block-item.red{
     background-color: #ab3d3d;
 }
+
+.block-item.disabled-block {
+    background-color: #3a3a3a !important;
+}
+
+.block-item.disabled-block > span {
+    opacity: 0.55;
+}
+
 .block-item span{
     display: block;
     text-align: center;
@@ -192,7 +201,8 @@
 }
 
 .edit-pencil-btn,
-.edit-trash-btn {
+.edit-trash-btn,
+.edit-disable-btn {
     background: rgba(0, 0, 0, 0.55);
     border: 1px solid #888;
     border-radius: 3px;
@@ -215,6 +225,12 @@
     background: rgba(160, 40, 40, 0.75);
     border-color: #c88;
 }
+
+.edit-disable-btn:hover {
+    background: rgba(180, 140, 20, 0.75);
+    border-color: #cba;
+}
+
 
 .block-delete-confirm {
     position: absolute;
@@ -282,6 +298,20 @@
 
     .block-item span {
         font-size: large;
+    }
+
+    /* Shrink the three edit icons so they fit within the narrower tile top-right corner */
+    .block-edit-icons {
+        gap: 2px;
+    }
+
+    .edit-pencil-btn,
+    .edit-trash-btn,
+    .edit-disable-btn {
+        width: 24px;
+        height: 24px;
+        line-height: 22px;
+        font-size: 12px;
     }
 }
 

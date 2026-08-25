@@ -19,4 +19,6 @@ public interface BlockService {
 
     void update(String oldName, Block updated, String userName);
 
+    void updateDisabled(String name, boolean disabled, String userName);
+
 }

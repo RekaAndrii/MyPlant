@@ -29,6 +29,7 @@ function initBlockEvent() {
     var blocks = $(".block-item").not("#addBlockBtn");
     blocks.click(function() {
         if (editModeActive) return;
+        if ($(this).attr("data-disabled") === "true") return;
 
         var span = $(this).children("span");
         var blockName = span.text();
@@ -166,6 +167,7 @@ function initEditMode() {
             $(".block-edit-icons").hide();
             $(".block-delete-confirm").hide();
         }
+        applyVisibility();
     });
 
     // Pencil: open edit modal pre-filled
@@ -255,6 +257,34 @@ function initEditMode() {
         });
     });
 
+    // Disable/enable: toggle block active status
+    $(document).on("click", ".edit-disable-btn", function(e) {
+        e.stopPropagation();
+        var btn = $(this);
+        var tile = btn.closest(".block-item");
+        var blockName = tile.attr("data-block-name");
+        var currentlyDisabled = tile.attr("data-disabled") === "true";
+        var newDisabled = !currentlyDisabled;
+
+        $.ajax({
+            url: "/block/" + encodeURIComponent(blockName) + "/disabled",
+            method: "PUT",
+            data: {"disabled": newDisabled},
+            success: function(result) {
+                if (result.hasError == false) {
+                    tile.attr("data-disabled", newDisabled);
+                    tile.toggleClass("disabled-block", newDisabled);
+                    if (newDisabled) {
+                        btn.attr("title", "Enable").html("&#9654;");
+                    } else {
+                        btn.attr("title", "Disable").html("&#9208;");
+                    }
+                    applyVisibility();
+                }
+            }
+        });
+    });
+
     // Trash: show delete confirmation on tile
     $(document).on("click", ".edit-trash-btn", function(e) {
         e.stopPropagation();
@@ -316,16 +346,27 @@ function setDayFilterState(active) {
     } else {
         btn.removeClass("active").text("Today only: Off");
     }
-    applyDayFilter(active);
+    applyVisibility();
 }
 
-function applyDayFilter(active) {
+// Single source of truth for block-col visibility: combines the "today only"
+// day filter with disabled-block hiding (disabled blocks are only shown while
+// edit mode is active).
+function applyVisibility() {
+    var dayFilterActive = $("#dayFilterBtn").hasClass("active");
     var today = currentIsoWeekday();
+
     $(".block-item").not("#addBlockBtn").each(function() {
         var tile = $(this);
         var col = tile.closest(".block-col");
 
-        if (!active) {
+        // Disabled blocks are hidden unless edit mode is active.
+        if (tile.attr("data-disabled") === "true" && !editModeActive) {
+            col.hide();
+            return;
+        }
+
+        if (!dayFilterActive) {
             col.show();
             return;
         }

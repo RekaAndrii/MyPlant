@@ -88,4 +88,14 @@ public class BlockServiceImpl implements BlockService{
 
         mongoTemplate.save(existing);
     }
+
+    @Override
+    public void updateDisabled(String name, boolean disabled, String userName) {
+        Block existing = findByName(name, userName);
+        if (existing == null) {
+            return;
+        }
+        existing.setDisabled(disabled);
+        mongoTemplate.save(existing);
+    }
 }

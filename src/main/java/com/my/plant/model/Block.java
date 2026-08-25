@@ -31,6 +31,7 @@ public class Block {
     private Integer remainingExecutions;
     private boolean completed;
     private List<Integer> scheduledDays;
+    private boolean disabled;
 
     public Block() {
     }
@@ -124,5 +125,13 @@ public class Block {
 
     public void setScheduledDays(List<Integer> scheduledDays) {
         this.scheduledDays = scheduledDays;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 }
