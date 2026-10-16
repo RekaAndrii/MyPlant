@@ -339,6 +339,15 @@
     vertical-align: middle;
 }
 
+.score-sep {
+    color: #bbb;
+    vertical-align: middle;
+}
+
+.score-past {
+    color: #888;
+}
+
 /* ---- Shared page layout utilities ---- */
 
 .page-content {

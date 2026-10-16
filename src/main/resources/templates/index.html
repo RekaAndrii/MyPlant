@@ -51,7 +51,7 @@
 
     <div class="block-container col-xs-12">
         <div class="score-bar">
-            <span class="score-label">Today's score: </span><span class="score-value" id="todayScore" th:text="${todayScore}">0</span>
+            <span class="score-label">Today's score: </span><span class="score-value" id="todayScore" th:text="${todayScore}">0</span><span class="score-sep"> &middot; </span><span class="score-label">Yesterday: </span><span class="score-value score-past" id="yesterdayScore" th:text="${yesterdayScore}">0</span><span class="score-sep"> &middot; </span><span class="score-label" id="weekAgoLabel" th:text="${weekAgoLabel} + ': '">Last week: </span><span class="score-value score-past" id="weekAgoScore" th:text="${weekAgoScore}">0</span>
         </div>
         <div class="block-row col-xs-12 row">
             <div th:each="bl : ${blocks}" class="col-xs-4 block-col">
